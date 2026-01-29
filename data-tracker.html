@@ -119,7 +119,7 @@
 
         function createChart(chartId, data, layout) {
             if (!chartsCreated[chartId]) {
-                Plotly.newPlot(chartId, data, layout, {responsive: true, displayModeBar: false});
+                Plotly.newPlot(chartId, data, layout, {responsive: true, displayModeBar: true});
                 chartsCreated[chartId] = true;
             }
         }
