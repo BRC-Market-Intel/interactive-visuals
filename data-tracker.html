@@ -202,12 +202,14 @@
         function changeFrequency(frequency) {
             currentFrequency = frequency;
 
-            // Update the currently active chart
-            if (currentTab === 'retail-sales') {
+            // Update all charts that have been created
+            if (chartsCreated['retail-sales-chart']) {
                 updateChart('retail-sales-chart', 'rsm', frequency);
-            } else if (currentTab === 'shop-prices') {
+            }
+            if (chartsCreated['spi-chart']) {
                 updateChart('spi-chart', 'spi', frequency);
-            } else if (currentTab === 'footfall') {
+            }
+            if (chartsCreated['footfall-chart']) {
                 updateChart('footfall-chart', 'ff', frequency);
             }
         }
