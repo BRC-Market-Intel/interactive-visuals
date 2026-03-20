@@ -208,9 +208,60 @@
             color: #262262;
         }
 
-        .date-range-slider {
+        .dual-range-slider {
+            position: relative;
             width: 100%;
-            margin: 10px 0;
+            height: 40px;
+            margin: 20px 0 10px 0;
+        }
+
+        .dual-range-slider input[type="range"] {
+            position: absolute;
+            width: 100%;
+            height: 5px;
+            background: transparent;
+            pointer-events: none;
+            -webkit-appearance: none;
+        }
+
+        .dual-range-slider input[type="range"]::-webkit-slider-thumb {
+            pointer-events: all;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid #262262;
+            background: white;
+            cursor: pointer;
+            -webkit-appearance: none;
+        }
+
+        .dual-range-slider input[type="range"]::-moz-range-thumb {
+            pointer-events: all;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid #262262;
+            background: white;
+            cursor: pointer;
+        }
+
+        .slider-track {
+            position: absolute;
+            width: 100%;
+            height: 5px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .slider-range {
+            position: absolute;
+            height: 5px;
+            background: #262262;
+            border-radius: 3px;
+            top: 50%;
+            transform: translateY(-50%);
         }
 
         .date-labels {
@@ -401,7 +452,12 @@
 
                     <div class="date-range-container" id="date-range-container" style="display: none;">
                         <h4>Date Range</h4>
-                        <input type="range" id="date-range-start" class="date-range-slider" min="0" max="100" value="0" oninput="updateDateRange()">
+                        <div class="dual-range-slider">
+                            <div class="slider-track"></div>
+                            <div class="slider-range" id="slider-range"></div>
+                            <input type="range" id="range-min" min="0" max="100" value="0" oninput="updateDateRange()">
+                            <input type="range" id="range-max" min="0" max="100" value="100" oninput="updateDateRange()">
+                        </div>
                         <div class="date-labels">
                             <span id="date-start-label"></span>
                             <span id="date-end-label"></span>
@@ -751,6 +807,11 @@
             customChartData = traces;
             allDates = traces[0] ? traces[0].x : [];
 
+            // Reset sliders to full range
+            document.getElementById('range-min').value = 0;
+            document.getElementById('range-max').value = 100;
+            updateSliderVisual();
+
             // Update date labels
             if (allDates.length > 0) {
                 document.getElementById('date-start-label').textContent = allDates[0];
@@ -774,15 +835,51 @@
             Plotly.newPlot('custom-chart-area', traces, layout, { responsive: true, displayModeBar: true });
         }
 
+        function updateSliderVisual() {
+            var minSlider = document.getElementById('range-min');
+            var maxSlider = document.getElementById('range-max');
+            var sliderRange = document.getElementById('slider-range');
+
+            var minVal = parseInt(minSlider.value);
+            var maxVal = parseInt(maxSlider.value);
+
+            // Prevent sliders from crossing
+            if (minVal >= maxVal) {
+                if (event && event.target.id === 'range-min') {
+                    minSlider.value = maxVal - 1;
+                    minVal = maxVal - 1;
+                } else {
+                    maxSlider.value = minVal + 1;
+                    maxVal = minVal + 1;
+                }
+            }
+
+            // Update visual range indicator
+            var percentMin = minVal;
+            var percentMax = maxVal;
+            sliderRange.style.left = percentMin + '%';
+            sliderRange.style.width = (percentMax - percentMin) + '%';
+        }
+
         function updateDateRange() {
-            var slider = document.getElementById('date-range-start');
-            var startIndex = Math.floor((slider.value / 100) * allDates.length);
+            updateSliderVisual();
+
+            var minSlider = document.getElementById('range-min');
+            var maxSlider = document.getElementById('range-max');
+
+            var startIndex = Math.floor((minSlider.value / 100) * (allDates.length - 1));
+            var endIndex = Math.ceil((maxSlider.value / 100) * (allDates.length - 1));
+
+            // Ensure we have at least one data point
+            if (endIndex <= startIndex) {
+                endIndex = startIndex + 1;
+            }
 
             // Filter traces based on date range
             var filteredTraces = customChartData.map(function(trace) {
                 return {
-                    x: trace.x.slice(startIndex),
-                    y: trace.y.slice(startIndex),
+                    x: trace.x.slice(startIndex, endIndex + 1),
+                    y: trace.y.slice(startIndex, endIndex + 1),
                     name: trace.name,
                     type: trace.type,
                     mode: trace.mode,
@@ -807,9 +904,12 @@
 
             Plotly.react('custom-chart-area', filteredTraces, layout, { responsive: true, displayModeBar: true });
 
-            // Update start label
+            // Update labels
             if (allDates[startIndex]) {
                 document.getElementById('date-start-label').textContent = allDates[startIndex];
+            }
+            if (allDates[endIndex]) {
+                document.getElementById('date-end-label').textContent = allDates[endIndex];
             }
         }
 
