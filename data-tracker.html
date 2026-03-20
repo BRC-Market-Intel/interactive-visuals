@@ -779,9 +779,8 @@
 
         function renderCustomChart(selectedSeries) {
             var traces = [];
-            var earliestDate = null;
-            var latestDate = null;
             var allXValues = [];
+            var allUniqueDates = new Set();
 
             // Build traces for each selected series
             selectedSeries.forEach(function(seriesId, index) {
@@ -799,28 +798,32 @@
                         y: sourceTrace.y,
                         name: mapping.label,
                         type: currentChartType === 'bar' ? 'bar' : 'scatter',
-                        mode: 'lines',
-                        line: { color: customColors[index % customColors.length], width: 2 },
+                        mode: currentChartType === 'bar' ? undefined : 'lines+markers',
+                        line: currentChartType === 'bar' ? undefined : { color: customColors[index % customColors.length], width: 2 },
+                        marker: currentChartType === 'bar' ? { color: customColors[index % customColors.length] } : { color: customColors[index % customColors.length], size: 4 },
                         connectgaps: false  // Don't connect gaps in data
                     };
 
                     if (currentChartType === 'bar') {
-                        trace.marker = { color: customColors[index % customColors.length] };
                         delete trace.connectgaps;  // Not applicable for bar charts
+                        delete trace.mode;
+                        delete trace.line;
                     }
 
                     traces.push(trace);
 
-                    // Collect all x values to find the union of dates
-                    if (allXValues.length === 0 || sourceTrace.x.length > allXValues.length) {
-                        allXValues = sourceTrace.x;
-                    }
+                    // Collect all unique dates from all series
+                    sourceTrace.x.forEach(function(date) {
+                        allUniqueDates.add(date);
+                    });
                 }
             });
 
-            // Store for date range filtering - use the longest x-axis as reference
+            // Convert set to sorted array - this becomes our master date range
+            allDates = Array.from(allUniqueDates).sort();
+
+            // Store for date range filtering
             customChartData = traces;
-            allDates = allXValues.slice(); // Make a copy
 
             // Reset sliders to full range
             var minSlider = document.getElementById('range-min');
