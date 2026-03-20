@@ -39,6 +39,25 @@
             gap: 15px;
         }
 
+        .date-range-group {
+            flex-direction: column;
+            align-items: flex-start;
+            min-width: 250px;
+        }
+
+        .date-range-group label {
+            margin-bottom: 5px;
+        }
+
+        .date-range-group .dual-range-slider {
+            width: 100%;
+        }
+
+        .date-range-group .date-labels {
+            width: 100%;
+            margin-top: 2px;
+        }
+
         .frequency-selector label {
             font-weight: 500;
             color: #262262;
@@ -382,6 +401,20 @@
                 </div>
             </div>
 
+            <div class="selector-group date-range-group" id="top-date-range-group">
+                <label>Date Range:</label>
+                <div class="dual-range-slider">
+                    <div class="slider-track"></div>
+                    <div class="slider-range" id="top-slider-range"></div>
+                    <input type="range" id="top-range-min" min="0" max="100" value="0" oninput="updateTopDateRange()">
+                    <input type="range" id="top-range-max" min="0" max="100" value="100" oninput="updateTopDateRange()">
+                </div>
+                <div class="date-labels">
+                    <span id="top-date-start-label"></span>
+                    <span id="top-date-end-label"></span>
+                </div>
+            </div>
+
             <button class="export-button" onclick="exportToExcel()">Export to Excel</button>
         </div>
 
@@ -464,20 +497,6 @@
                     <div class="selection-counter" id="selection-counter">
                         0 / 8 series selected
                     </div>
-
-                    <div class="date-range-container" id="date-range-container" style="display: none;">
-                        <h4>Date Range</h4>
-                        <div class="dual-range-slider">
-                            <div class="slider-track"></div>
-                            <div class="slider-range" id="slider-range"></div>
-                            <input type="range" id="range-min" min="0" max="100" value="0" oninput="updateDateRange()">
-                            <input type="range" id="range-max" min="0" max="100" value="100" oninput="updateDateRange()">
-                        </div>
-                        <div class="date-labels">
-                            <span id="date-start-label"></span>
-                            <span id="date-end-label"></span>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="custom-chart-display">
@@ -527,6 +546,8 @@
         var customChartDateRange = { start: 0, end: 100 };
         var allDates = [];
         var customChartData = [];
+        var currentDateRange = { min: 0, max: 100 }; // Global date range for top slider
+        var currentTabDates = []; // Dates available for current tab
 
         var currentFrequency = 'monthly';
         var currentChartType = 'line';
@@ -566,6 +587,11 @@
 
             Plotly.newPlot(chartId, data, layout, {responsive: true, displayModeBar: true});
             chartsCreated[chartId] = true;
+
+            // Initialize top date range slider for this chart
+            if (data && data.length > 0 && data[0].x) {
+                initializeTopDateRange(data[0].x);
+            }
         }
 
         function updateChart(chartId, chartType, frequency, displayType) {
@@ -768,11 +794,9 @@
             if (selectedSeries.length === 0) {
                 document.getElementById('custom-chart-area').style.display = 'none';
                 document.getElementById('custom-chart-placeholder').style.display = 'flex';
-                document.getElementById('date-range-container').style.display = 'none';
             } else {
                 document.getElementById('custom-chart-area').style.display = 'block';
                 document.getElementById('custom-chart-placeholder').style.display = 'none';
-                document.getElementById('date-range-container').style.display = 'block';
                 renderCustomChart(selectedSeries);
             }
         }
@@ -829,20 +853,8 @@
             // Store for date range filtering
             customChartData = traces;
 
-            // Reset sliders to full range
-            var minSlider = document.getElementById('range-min');
-            var maxSlider = document.getElementById('range-max');
-            if (minSlider && maxSlider) {
-                minSlider.value = 0;
-                maxSlider.value = 100;
-                updateSliderVisual();
-            }
-
-            // Update date labels
-            if (allDates.length > 0) {
-                document.getElementById('date-start-label').textContent = allDates[0];
-                document.getElementById('date-end-label').textContent = allDates[allDates.length - 1];
-            }
+            // Initialize top date range slider with all unique dates
+            initializeTopDateRange(allDates);
 
             var layout = {
                 font: { family: "Lato", size: 16 },
@@ -864,17 +876,17 @@
             Plotly.newPlot('custom-chart-area', traces, layout, { responsive: true, displayModeBar: true });
         }
 
-        function updateSliderVisual() {
-            var minSlider = document.getElementById('range-min');
-            var maxSlider = document.getElementById('range-max');
-            var sliderRange = document.getElementById('slider-range');
+        function updateTopSliderVisual() {
+            var minSlider = document.getElementById('top-range-min');
+            var maxSlider = document.getElementById('top-range-max');
+            var sliderRange = document.getElementById('top-slider-range');
 
             if (!minSlider || !maxSlider || !sliderRange) return;
 
             var minVal = parseInt(minSlider.value);
             var maxVal = parseInt(maxSlider.value);
 
-            // Prevent sliders from crossing - ensure min is always less than max
+            // Prevent sliders from crossing
             if (minVal > maxVal - 1) {
                 minSlider.value = maxVal - 1;
                 minVal = maxVal - 1;
@@ -887,55 +899,128 @@
             // Update visual range indicator
             sliderRange.style.left = minVal + '%';
             sliderRange.style.width = (maxVal - minVal) + '%';
+
+            currentDateRange = { min: minVal, max: maxVal };
         }
 
-        function updateDateRange() {
-            if (allDates.length === 0 || customChartData.length === 0) {
-                console.log('No data available for date range update');
-                return;
+        function initializeTopDateRange(dates) {
+            if (!dates || dates.length === 0) return;
+
+            currentTabDates = dates;
+
+            // Reset sliders to full range
+            var minSlider = document.getElementById('top-range-min');
+            var maxSlider = document.getElementById('top-range-max');
+            if (minSlider && maxSlider) {
+                minSlider.value = 0;
+                maxSlider.value = 100;
+                currentDateRange = { min: 0, max: 100 };
+                updateTopSliderVisual();
             }
 
-            updateSliderVisual();
+            // Update labels
+            document.getElementById('top-date-start-label').textContent = dates[0];
+            document.getElementById('top-date-end-label').textContent = dates[dates.length - 1];
+        }
 
-            var minSlider = document.getElementById('range-min');
-            var maxSlider = document.getElementById('range-max');
+        function updateTopDateRange() {
+            updateTopSliderVisual();
 
-            if (!minSlider || !maxSlider) {
-                console.log('Sliders not found');
-                return;
-            }
+            if (currentTabDates.length === 0) return;
 
-            // Get the actual date range based on slider positions
-            var startIndex = Math.floor((parseInt(minSlider.value) / 100) * (allDates.length - 1));
-            var endIndex = Math.ceil((parseInt(maxSlider.value) / 100) * (allDates.length - 1));
+            var minSlider = document.getElementById('top-range-min');
+            var maxSlider = document.getElementById('top-range-max');
 
-            // Ensure we have at least one data point
+            if (!minSlider || !maxSlider) return;
+
+            var startIndex = Math.floor((parseInt(minSlider.value) / 100) * (currentTabDates.length - 1));
+            var endIndex = Math.ceil((parseInt(maxSlider.value) / 100) * (currentTabDates.length - 1));
+
             if (endIndex <= startIndex) {
                 endIndex = startIndex + 1;
             }
-            if (endIndex >= allDates.length) {
-                endIndex = allDates.length - 1;
+            if (endIndex >= currentTabDates.length) {
+                endIndex = currentTabDates.length - 1;
             }
 
-            // Get the actual start and end dates
-            var startDate = allDates[startIndex];
-            var endDate = allDates[endIndex];
+            var startDate = currentTabDates[startIndex];
+            var endDate = currentTabDates[endIndex];
 
-            console.log('Date Range Update:', {
-                frequency: currentFrequency,
-                startDate: startDate,
-                endDate: endDate,
-                startIndex: startIndex,
-                endIndex: endIndex
+            // Update labels
+            document.getElementById('top-date-start-label').textContent = startDate;
+            document.getElementById('top-date-end-label').textContent = endDate;
+
+            // Update the current chart based on active tab
+            if (currentTab === 'custom-chart') {
+                updateCustomChartDateRange(startDate, endDate);
+            } else {
+                updateStandardChartDateRange(startDate, endDate);
+            }
+        }
+
+        function updateStandardChartDateRange(startDate, endDate) {
+            var chartId, chartType;
+
+            if (currentTab === 'retail-sales') {
+                chartId = 'retail-sales-chart';
+                chartType = 'rsm';
+            } else if (currentTab === 'shop-prices') {
+                chartId = 'spi-chart';
+                chartType = 'spi';
+            } else if (currentTab === 'footfall') {
+                chartId = 'footfall-chart';
+                chartType = 'ff';
+            } else {
+                return;
+            }
+
+            var dataset = chartData[chartType][currentFrequency];
+            var filteredData = dataset.data.map(function(trace) {
+                var startIdx = 0;
+                var endIdx = trace.x.length - 1;
+
+                for (var i = 0; i < trace.x.length; i++) {
+                    if (trace.x[i] >= startDate) {
+                        startIdx = i;
+                        break;
+                    }
+                }
+
+                for (var i = trace.x.length - 1; i >= 0; i--) {
+                    if (trace.x[i] <= endDate) {
+                        endIdx = i;
+                        break;
+                    }
+                }
+
+                var filteredTrace = {
+                    x: trace.x.slice(startIdx, endIdx + 1),
+                    y: trace.y.slice(startIdx, endIdx + 1),
+                    name: trace.name,
+                    type: currentChartType === 'bar' ? 'bar' : 'scatter',
+                    mode: 'lines'
+                };
+
+                if (currentChartType === 'bar') {
+                    filteredTrace.marker = { color: trace.line ? trace.line.color : trace.marker.color };
+                    delete filteredTrace.mode;
+                } else {
+                    filteredTrace.line = trace.line;
+                }
+
+                return filteredTrace;
             });
 
-            // Filter each trace based on its own date values within the selected range
+            Plotly.react(chartId, filteredData, dataset.layout, {responsive: true, displayModeBar: true});
+        }
+
+        function updateCustomChartDateRange(startDate, endDate) {
+            if (customChartData.length === 0) return;
+
             var filteredTraces = customChartData.map(function(trace) {
-                // Find indices in this trace's x array that fall within the date range
                 var traceStartIndex = 0;
                 var traceEndIndex = trace.x.length - 1;
 
-                // Find first index where x >= startDate
                 for (var i = 0; i < trace.x.length; i++) {
                     if (trace.x[i] >= startDate) {
                         traceStartIndex = i;
@@ -943,7 +1028,6 @@
                     }
                 }
 
-                // Find last index where x <= endDate
                 for (var i = trace.x.length - 1; i >= 0; i--) {
                     if (trace.x[i] <= endDate) {
                         traceEndIndex = i;
@@ -951,7 +1035,6 @@
                     }
                 }
 
-                // Ensure at least one point
                 if (traceEndIndex < traceStartIndex) {
                     traceEndIndex = traceStartIndex;
                 }
@@ -962,30 +1045,24 @@
                     name: trace.name,
                     type: trace.type || 'scatter',
                     mode: trace.mode || 'lines',
-                    connectgaps: false  // Don't connect gaps in data
+                    connectgaps: false
                 };
 
-                // Copy line properties if they exist
                 if (trace.line) {
                     filteredTrace.line = JSON.parse(JSON.stringify(trace.line));
                 }
 
-                // Copy marker properties if they exist
                 if (trace.marker) {
                     filteredTrace.marker = JSON.parse(JSON.stringify(trace.marker));
-                    delete filteredTrace.connectgaps;  // Not applicable for bar charts
+                    delete filteredTrace.connectgaps;
                 }
 
-                console.log('Filtered trace:', trace.name, 'from', trace.x.length, 'to', filteredTrace.x.length, 'points', 'range:', filteredTrace.x[0], 'to', filteredTrace.x[filteredTrace.x.length - 1]);
                 return filteredTrace;
             });
 
             var layout = {
                 font: { family: "Lato", size: 16 },
-                xaxis: { 
-                    showgrid: false, 
-                    gridcolor: 'rgba(0,0,0,0.1)'
-                },
+                xaxis: { showgrid: false, gridcolor: 'rgba(0,0,0,0.1)' },
                 yaxis: { 
                     title: 'Year Percentage Change (%)',
                     showgrid: true, 
@@ -998,10 +1075,16 @@
             };
 
             Plotly.react('custom-chart-area', filteredTraces, layout, { responsive: true, displayModeBar: true });
+        }
 
-            // Update labels
-            document.getElementById('date-start-label').textContent = startDate;
-            document.getElementById('date-end-label').textContent = endDate;
+        function updateSliderVisual() {
+            // Legacy function - now redirects to top slider
+            updateTopSliderVisual();
+        }
+
+        function updateDateRange() {
+            // Legacy function - now redirects to top slider
+            updateTopDateRange();
         }
 
         // Excel export function
