@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * {
@@ -819,15 +819,12 @@
                 }
             });
 
-            // Convert set to sorted array - sort chronologically not alphabetically
+            // Convert set to sorted array - sort chronologically
             allDates = Array.from(allUniqueDates).sort(function(a, b) {
-                // Convert to comparable format for proper chronological sorting
                 if (a < b) return -1;
                 if (a > b) return 1;
                 return 0;
             });
-
-            console.log('All dates range:', allDates[0], 'to', allDates[allDates.length - 1], 'Total:', allDates.length);
 
             // Store for date range filtering
             customChartData = traces;
@@ -851,8 +848,7 @@
                 font: { family: "Lato", size: 16 },
                 xaxis: { 
                     showgrid: false, 
-                    gridcolor: 'rgba(0,0,0,0.1)',
-                    type: 'category'  // Treat dates as categorical to prevent interpolation
+                    gridcolor: 'rgba(0,0,0,0.1)'
                 },
                 yaxis: { 
                     title: 'Year Percentage Change (%)',
@@ -988,8 +984,7 @@
                 font: { family: "Lato", size: 16 },
                 xaxis: { 
                     showgrid: false, 
-                    gridcolor: 'rgba(0,0,0,0.1)',
-                    type: 'category'  // Treat dates as categorical to prevent interpolation
+                    gridcolor: 'rgba(0,0,0,0.1)'
                 },
                 yaxis: { 
                     title: 'Year Percentage Change (%)',
