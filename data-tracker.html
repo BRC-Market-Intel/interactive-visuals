@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -101,6 +102,142 @@
             color: white;
         }
 
+        .export-button {
+            margin-left: auto;
+            padding: 8px 20px;
+            background: #262262;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Lato', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .export-button:hover {
+            background: #1a1a4a;
+        }
+
+        .custom-chart-builder {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            height: calc(100% - 40px);
+        }
+
+        .series-selector {
+            width: 300px;
+            background: #f8f8f8;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-y: auto;
+            max-height: 600px;
+        }
+
+        .series-selector h3 {
+            margin: 0 0 15px 0;
+            color: #262262;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .series-group {
+            margin-bottom: 20px;
+        }
+
+        .series-group-title {
+            font-weight: 600;
+            color: #262262;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .series-checkbox {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            cursor: pointer;
+        }
+
+        .series-checkbox input[type="checkbox"] {
+            margin-right: 8px;
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+        }
+
+        .series-checkbox label {
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .series-checkbox input[type="checkbox"]:disabled + label {
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .selection-counter {
+            margin-top: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .selection-counter.max {
+            background: #fff3cd;
+            color: #856404;
+            font-weight: 500;
+        }
+
+        .date-range-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 4px;
+        }
+
+        .date-range-container h4 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #262262;
+        }
+
+        .date-range-slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .date-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .custom-chart-display {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .custom-chart-placeholder {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 16px;
+            text-align: center;
+            padding: 40px;
+        }
+
         .tabs {
             display: flex;
             border-bottom: 2px solid #e0e0e0;
@@ -178,12 +315,15 @@
                     <button class="chart-type-button" onclick="changeChartType('bar')">Bar</button>
                 </div>
             </div>
+
+            <button class="export-button" onclick="exportToExcel()">Export to Excel</button>
         </div>
 
         <div class="tabs">
             <button class="tab-button active" onclick="openTab(event, 'retail-sales')">Retail Sales</button>
             <button class="tab-button" onclick="openTab(event, 'shop-prices')">Shop Prices</button>
             <button class="tab-button" onclick="openTab(event, 'footfall')">Footfall</button>
+            <button class="tab-button" onclick="openTab(event, 'custom-chart')">Build Your Own</button>
         </div>
 
         <div id="retail-sales" class="tab-content active">
@@ -197,6 +337,86 @@
         <div id="footfall" class="tab-content">
             <div id="footfall-chart" class="chart-container"></div>
         </div>
+
+        <div id="custom-chart" class="tab-content">
+            <div class="custom-chart-builder">
+                <div class="series-selector">
+                    <h3>Select Series (Max 8)</h3>
+
+                    <div class="series-group">
+                        <div class="series-group-title">Retail Sales Monitor</div>
+                        <div class="series-checkbox">
+                            <input type="checkbox" id="rsm-total" value="rsm-total" onchange="updateCustomChart()">
+                            <label for="rsm-total">Total Sales</label>
+                        </div>
+                        <div class="series-checkbox">
+                            <input type="checkbox" id="rsm-food" value="rsm-food" onchange="updateCustomChart()">
+                            <label for="rsm-food">Food Sales</label>
+                        </div>
+                        <div class="series-checkbox">
+                            <input type="checkbox" id="rsm-nonfood" value="rsm-nonfood" onchange="updateCustomChart()">
+                            <label for="rsm-nonfood">Non-Food Sales</label>
+                        </div>
+                    </div>
+
+                    <div class="series-group">
+                        <div class="series-group-title">Shop Price Index</div>
+                        <div class="series-checkbox">
+                            <input type="checkbox" id="spi-all" value="spi-all" onchange="updateCustomChart()">
+                            <label for="spi-all">All Items</label>
+                        </div>
+                        <div class="series-checkbox">
+                            <input type="checkbox" id="spi-food" value="spi-food" onchange="updateCustomChart()">
+                            <label for="spi-food">Food Prices</label>
+                        </div>
+                        <div class="series-checkbox">
+                            <input type="checkbox" id="spi-nonfood" value="spi-nonfood" onchange="updateCustomChart()">
+                            <label for="spi-nonfood">Non-Food Prices</label>
+                        </div>
+                    </div>
+
+                    <div class="series-group">
+                        <div class="series-group-title">Footfall</div>
+                        <div class="series-checkbox">
+                            <input type="checkbox" id="ff-total" value="ff-total" onchange="updateCustomChart()">
+                            <label for="ff-total">Total Retail</label>
+                        </div>
+                        <div class="series-checkbox">
+                            <input type="checkbox" id="ff-highstreets" value="ff-highstreets" onchange="updateCustomChart()">
+                            <label for="ff-highstreets">High Streets</label>
+                        </div>
+                        <div class="series-checkbox">
+                            <input type="checkbox" id="ff-retailparks" value="ff-retailparks" onchange="updateCustomChart()">
+                            <label for="ff-retailparks">Retail Parks</label>
+                        </div>
+                        <div class="series-checkbox">
+                            <input type="checkbox" id="ff-shopping" value="ff-shopping" onchange="updateCustomChart()">
+                            <label for="ff-shopping">Shopping Centres</label>
+                        </div>
+                    </div>
+
+                    <div class="selection-counter" id="selection-counter">
+                        0 / 8 series selected
+                    </div>
+
+                    <div class="date-range-container" id="date-range-container" style="display: none;">
+                        <h4>Date Range</h4>
+                        <input type="range" id="date-range-start" class="date-range-slider" min="0" max="100" value="0" oninput="updateDateRange()">
+                        <div class="date-labels">
+                            <span id="date-start-label"></span>
+                            <span id="date-end-label"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="custom-chart-display">
+                    <div id="custom-chart-area" class="chart-container" style="display: none;"></div>
+                    <div id="custom-chart-placeholder" class="custom-chart-placeholder">
+                        Select series from the left to build your custom chart
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -207,13 +427,44 @@
             ff: {"monthly": {"data": [{"hovertemplate": "Date: %{x}<br>Value: %{y:.1f}%", "legendgroup": "Total Retail", "line": {"color": "#262262", "dash": "solid"}, "marker": {"symbol": "circle"}, "mode": "lines", "name": "Total Retail", "orientation": "v", "showlegend": true, "x": ["2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02"], "xaxis": "x", "y": [11.8, 8.7, 4.8, 1.6, -2.8, -1.9, 1.83, -1.6, -2.9, -5.7, -0.7, -5.0, -2.8, -4.01, -1.3, -7.2, -3.6, -2.3, -3.3, -0.4, 3.3, -1.1, -4.5, -2.2, 6.6, 0.2, -5.4, 7.2, -1.7, -1.8, -0.4, -0.4, -1.8, -0.7, -0.8, -2.9, -0.6, -4.7], "yaxis": "y", "type": "scatter", "customdata": ["Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail"]}, {"hovertemplate": "Date: %{x}<br>Value: %{y:.1f}%", "legendgroup": "High Streets", "line": {"color": "#92278F", "dash": "solid"}, "marker": {"symbol": "circle"}, "mode": "lines", "name": "High Streets", "orientation": "v", "showlegend": true, "x": ["2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02"], "xaxis": "x", "y": [17.5, 15.5, 6.0, 3.4, -0.5, 0.6, 1.6, -0.9, -1.7, -4.6, -1.7, -4.2, -2.3, -7.14, -1.5, -6.9, -2.7, -3.1, -2.7, -0.3, 0.9, -3.6, -3.7, -2.7, 4.5, 0.1, -4.0, 5.3, -2.49, -3.0, -1.7, 1.1, -2.5, 0.6, -1.2, -0.9, -1.9, -5.4], "yaxis": "y", "type": "scatter", "customdata": ["High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets"]}, {"hovertemplate": "Date: %{x}<br>Value: %{y:.1f}%", "legendgroup": "Retail Parks", "line": {"color": "#00BBCE", "dash": "solid"}, "marker": {"symbol": "circle"}, "mode": "lines", "name": "Retail Parks", "orientation": "v", "showlegend": true, "x": ["2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02"], "xaxis": "x", "y": [3.97, 4.63, 1.52, 0.35, -4.13, -2.63, 1.4, 0.0, -2.4, -4.3, -1.0, -4.8, -1.8, -2.52, -3.5, -6.2, -2.3, -0.4, -0.8, 2.6, 7.3, 4.8, -1.1, 0.0, 7.9, 2.0, -1.2, 7.5, 0.18, -1.1, 1.7, -1.1, -0.8, -0.5, -0.4, -2.5, 1.1, -3.1], "yaxis": "y", "type": "scatter", "customdata": ["Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks"]}, {"hovertemplate": "Date: %{x}<br>Value: %{y:.1f}%", "legendgroup": "Shopping Centres", "line": {"color": "#6D7378", "dash": "solid"}, "marker": {"symbol": "circle"}, "mode": "lines", "name": "Shopping Centres", "orientation": "v", "showlegend": true, "x": ["2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02"], "xaxis": "x", "y": [15.84, 5.15, 1.04, -0.46, -4.85, -4.22, 0.17, -3.8, -4.0, -7.3, -2.2, -7.4, -5.0, -4.82, 0.3, -7.2, -4.5, -3.2, -3.9, -1.8, 2.3, -1.6, -6.1, -3.3, 7.4, 0.1, -5.8, 5.6, -2.3, -1.6, -0.3, 0.0, -2.0, -0.9, -1.3, -5.1, -0.8, -5.5], "yaxis": "y", "type": "scatter", "customdata": ["Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres"]}], "layout": {"template": {"data": {"histogram2dcontour": [{"type": "histogram2dcontour", "colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}], "choropleth": [{"type": "choropleth", "colorbar": {"outlinewidth": 0, "ticks": ""}}], "histogram2d": [{"type": "histogram2d", "colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}], "heatmap": [{"type": "heatmap", "colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}], "contourcarpet": [{"type": "contourcarpet", "colorbar": {"outlinewidth": 0, "ticks": ""}}], "contour": [{"type": "contour", "colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}], "surface": [{"type": "surface", "colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}], "mesh3d": [{"type": "mesh3d", "colorbar": {"outlinewidth": 0, "ticks": ""}}], "scatter": [{"fillpattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}, "type": "scatter"}], "parcoords": [{"type": "parcoords", "line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scatterpolargl": [{"type": "scatterpolargl", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "bar": [{"error_x": {"color": "#2a3f5f"}, "error_y": {"color": "#2a3f5f"}, "marker": {"line": {"color": "#E5ECF6", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "bar"}], "scattergeo": [{"type": "scattergeo", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scatterpolar": [{"type": "scatterpolar", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "histogram": [{"marker": {"pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "histogram"}], "scattergl": [{"type": "scattergl", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scatter3d": [{"type": "scatter3d", "line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scattermap": [{"type": "scattermap", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scattermapbox": [{"type": "scattermapbox", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scatterternary": [{"type": "scatterternary", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scattercarpet": [{"type": "scattercarpet", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "carpet": [{"aaxis": {"endlinecolor": "#2a3f5f", "gridcolor": "white", "linecolor": "white", "minorgridcolor": "white", "startlinecolor": "#2a3f5f"}, "baxis": {"endlinecolor": "#2a3f5f", "gridcolor": "white", "linecolor": "white", "minorgridcolor": "white", "startlinecolor": "#2a3f5f"}, "type": "carpet"}], "table": [{"cells": {"fill": {"color": "#EBF0F8"}, "line": {"color": "white"}}, "header": {"fill": {"color": "#C8D4E3"}, "line": {"color": "white"}}, "type": "table"}], "barpolar": [{"marker": {"line": {"color": "#E5ECF6", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "barpolar"}], "pie": [{"automargin": true, "type": "pie"}]}, "layout": {"autotypenumbers": "strict", "colorway": ["#636efa", "#EF553B", "#00cc96", "#ab63fa", "#FFA15A", "#19d3f3", "#FF6692", "#B6E880", "#FF97FF", "#FECB52"], "font": {"color": "#2a3f5f"}, "hovermode": "closest", "hoverlabel": {"align": "left"}, "paper_bgcolor": "white", "plot_bgcolor": "#E5ECF6", "polar": {"bgcolor": "#E5ECF6", "angularaxis": {"gridcolor": "white", "linecolor": "white", "ticks": ""}, "radialaxis": {"gridcolor": "white", "linecolor": "white", "ticks": ""}}, "ternary": {"bgcolor": "#E5ECF6", "aaxis": {"gridcolor": "white", "linecolor": "white", "ticks": ""}, "baxis": {"gridcolor": "white", "linecolor": "white", "ticks": ""}, "caxis": {"gridcolor": "white", "linecolor": "white", "ticks": ""}}, "coloraxis": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "colorscale": {"sequential": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "sequentialminus": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "diverging": [[0, "#8e0152"], [0.1, "#c51b7d"], [0.2, "#de77ae"], [0.3, "#f1b6da"], [0.4, "#fde0ef"], [0.5, "#f7f7f7"], [0.6, "#e6f5d0"], [0.7, "#b8e186"], [0.8, "#7fbc41"], [0.9, "#4d9221"], [1, "#276419"]]}, "xaxis": {"gridcolor": "white", "linecolor": "white", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "white", "automargin": true, "zerolinewidth": 2}, "yaxis": {"gridcolor": "white", "linecolor": "white", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "white", "automargin": true, "zerolinewidth": 2}, "scene": {"xaxis": {"backgroundcolor": "#E5ECF6", "gridcolor": "white", "linecolor": "white", "showbackground": true, "ticks": "", "zerolinecolor": "white", "gridwidth": 2}, "yaxis": {"backgroundcolor": "#E5ECF6", "gridcolor": "white", "linecolor": "white", "showbackground": true, "ticks": "", "zerolinecolor": "white", "gridwidth": 2}, "zaxis": {"backgroundcolor": "#E5ECF6", "gridcolor": "white", "linecolor": "white", "showbackground": true, "ticks": "", "zerolinecolor": "white", "gridwidth": 2}}, "shapedefaults": {"line": {"color": "#2a3f5f"}}, "annotationdefaults": {"arrowcolor": "#2a3f5f", "arrowhead": 0, "arrowwidth": 1}, "geo": {"bgcolor": "white", "landcolor": "#E5ECF6", "subunitcolor": "white", "showland": true, "showlakes": true, "lakecolor": "white"}, "title": {"x": 0.05}, "mapbox": {"style": "light"}}}, "xaxis": {"anchor": "y", "domain": [0.0, 1.0], "title": {}, "showgrid": false, "gridcolor": "rgba(0,0,0,0.1)"}, "yaxis": {"anchor": "x", "domain": [0.0, 1.0], "title": {"text": "Year Percentage Change (%)"}, "showgrid": true, "gridcolor": "rgba(0,0,0,0.1)", "side": "right"}, "legend": {"title": {"text": ""}, "tracegroupgap": 0, "orientation": "h", "y": 1.15, "x": 0.0}, "margin": {"t": 60, "b": 110}, "font": {"family": "Lato", "size": 16}, "annotations": [{"showarrow": false, "text": "Source: British Retail Consortium - Sensormatic Solutions", "x": 0.01, "xanchor": "left", "xref": "paper", "y": -0.26, "yanchor": "bottom", "yref": "paper"}], "plot_bgcolor": "rgba(255, 255, 255, 0)"}}, "quarterly": {"data": [{"hovertemplate": "Date: %{x}<br>Value: %{y:.1f}%", "legendgroup": "Total Retail", "line": {"color": "#262262", "dash": "solid"}, "marker": {"symbol": "circle"}, "mode": "lines", "name": "Total Retail", "orientation": "v", "showlegend": true, "x": ["2023Q1", "2023Q2", "2023Q3", "2023Q4", "2024Q1", "2024Q2", "2024Q3", "2024Q4", "2025Q1", "2025Q2", "2025Q3", "2025Q4"], "xaxis": "x", "y": [8.15, -1.1, -1.04, -3.89, -2.6, -4.21, 0.13, -2.57, 0.49, 1.0, -0.94, -1.58], "yaxis": "y", "type": "scatter", "customdata": ["Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail", "Total Retail"]}, {"hovertemplate": "Date: %{x}<br>Value: %{y:.1f}%", "legendgroup": "High Streets", "line": {"color": "#92278F", "dash": "solid"}, "marker": {"symbol": "circle"}, "mode": "lines", "name": "High Streets", "orientation": "v", "showlegend": true, "x": ["2023Q1", "2023Q2", "2023Q3", "2023Q4", "2024Q1", "2024Q2", "2024Q3", "2024Q4", "2025Q1", "2025Q2", "2025Q3", "2025Q4"], "xaxis": "x", "y": [12.46, 1.12, -0.44, -3.55, -3.48, -4.15, -0.58, -3.28, 0.21, -0.29, -1.15, -0.53], "yaxis": "y", "type": "scatter", "customdata": ["High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets", "High Streets"]}, {"hovertemplate": "Date: %{x}<br>Value: %{y:.1f}%", "legendgroup": "Retail Parks", "line": {"color": "#00BBCE", "dash": "solid"}, "marker": {"symbol": "circle"}, "mode": "lines", "name": "Retail Parks", "orientation": "v", "showlegend": true, "x": ["2023Q1", "2023Q2", "2023Q3", "2023Q4", "2024Q1", "2024Q2", "2024Q3", "2024Q4", "2025Q1", "2025Q2", "2025Q3", "2025Q4"], "xaxis": "x", "y": [3.23, -2.17, -0.49, -3.48, -2.68, -2.77, 3.36, 1.14, 2.96, 1.94, -0.12, -1.24], "yaxis": "y", "type": "scatter", "customdata": ["Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks", "Retail Parks"]}, {"hovertemplate": "Date: %{x}<br>Value: %{y:.1f}%", "legendgroup": "Shopping Centres", "line": {"color": "#6D7378", "dash": "solid"}, "marker": {"symbol": "circle"}, "mode": "lines", "name": "Shopping Centres", "orientation": "v", "showlegend": true, "x": ["2023Q1", "2023Q2", "2023Q3", "2023Q4", "2024Q1", "2024Q2", "2024Q3", "2024Q4", "2025Q1", "2025Q2", "2025Q3", "2025Q4"], "xaxis": "x", "y": [6.86, -3.26, -2.66, -5.77, -2.91, -4.83, -0.87, -3.64, 0.6, 0.4, -0.86, -2.64], "yaxis": "y", "type": "scatter", "customdata": ["Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres", "Shopping Centres"]}], "layout": {"template": {"data": {"histogram2dcontour": [{"type": "histogram2dcontour", "colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}], "choropleth": [{"type": "choropleth", "colorbar": {"outlinewidth": 0, "ticks": ""}}], "histogram2d": [{"type": "histogram2d", "colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}], "heatmap": [{"type": "heatmap", "colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}], "contourcarpet": [{"type": "contourcarpet", "colorbar": {"outlinewidth": 0, "ticks": ""}}], "contour": [{"type": "contour", "colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}], "surface": [{"type": "surface", "colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}], "mesh3d": [{"type": "mesh3d", "colorbar": {"outlinewidth": 0, "ticks": ""}}], "scatter": [{"fillpattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}, "type": "scatter"}], "parcoords": [{"type": "parcoords", "line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scatterpolargl": [{"type": "scatterpolargl", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "bar": [{"error_x": {"color": "#2a3f5f"}, "error_y": {"color": "#2a3f5f"}, "marker": {"line": {"color": "#E5ECF6", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "bar"}], "scattergeo": [{"type": "scattergeo", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scatterpolar": [{"type": "scatterpolar", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "histogram": [{"marker": {"pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "histogram"}], "scattergl": [{"type": "scattergl", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scatter3d": [{"type": "scatter3d", "line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scattermap": [{"type": "scattermap", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scattermapbox": [{"type": "scattermapbox", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scatterternary": [{"type": "scatterternary", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scattercarpet": [{"type": "scattercarpet", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "carpet": [{"aaxis": {"endlinecolor": "#2a3f5f", "gridcolor": "white", "linecolor": "white", "minorgridcolor": "white", "startlinecolor": "#2a3f5f"}, "baxis": {"endlinecolor": "#2a3f5f", "gridcolor": "white", "linecolor": "white", "minorgridcolor": "white", "startlinecolor": "#2a3f5f"}, "type": "carpet"}], "table": [{"cells": {"fill": {"color": "#EBF0F8"}, "line": {"color": "white"}}, "header": {"fill": {"color": "#C8D4E3"}, "line": {"color": "white"}}, "type": "table"}], "barpolar": [{"marker": {"line": {"color": "#E5ECF6", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "barpolar"}], "pie": [{"automargin": true, "type": "pie"}]}, "layout": {"autotypenumbers": "strict", "colorway": ["#636efa", "#EF553B", "#00cc96", "#ab63fa", "#FFA15A", "#19d3f3", "#FF6692", "#B6E880", "#FF97FF", "#FECB52"], "font": {"color": "#2a3f5f"}, "hovermode": "closest", "hoverlabel": {"align": "left"}, "paper_bgcolor": "white", "plot_bgcolor": "#E5ECF6", "polar": {"bgcolor": "#E5ECF6", "angularaxis": {"gridcolor": "white", "linecolor": "white", "ticks": ""}, "radialaxis": {"gridcolor": "white", "linecolor": "white", "ticks": ""}}, "ternary": {"bgcolor": "#E5ECF6", "aaxis": {"gridcolor": "white", "linecolor": "white", "ticks": ""}, "baxis": {"gridcolor": "white", "linecolor": "white", "ticks": ""}, "caxis": {"gridcolor": "white", "linecolor": "white", "ticks": ""}}, "coloraxis": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "colorscale": {"sequential": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "sequentialminus": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "diverging": [[0, "#8e0152"], [0.1, "#c51b7d"], [0.2, "#de77ae"], [0.3, "#f1b6da"], [0.4, "#fde0ef"], [0.5, "#f7f7f7"], [0.6, "#e6f5d0"], [0.7, "#b8e186"], [0.8, "#7fbc41"], [0.9, "#4d9221"], [1, "#276419"]]}, "xaxis": {"gridcolor": "white", "linecolor": "white", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "white", "automargin": true, "zerolinewidth": 2}, "yaxis": {"gridcolor": "white", "linecolor": "white", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "white", "automargin": true, "zerolinewidth": 2}, "scene": {"xaxis": {"backgroundcolor": "#E5ECF6", "gridcolor": "white", "linecolor": "white", "showbackground": true, "ticks": "", "zerolinecolor": "white", "gridwidth": 2}, "yaxis": {"backgroundcolor": "#E5ECF6", "gridcolor": "white", "linecolor": "white", "showbackground": true, "ticks": "", "zerolinecolor": "white", "gridwidth": 2}, "zaxis": {"backgroundcolor": "#E5ECF6", "gridcolor": "white", "linecolor": "white", "showbackground": true, "ticks": "", "zerolinecolor": "white", "gridwidth": 2}}, "shapedefaults": {"line": {"color": "#2a3f5f"}}, "annotationdefaults": {"arrowcolor": "#2a3f5f", "arrowhead": 0, "arrowwidth": 1}, "geo": {"bgcolor": "white", "landcolor": "#E5ECF6", "subunitcolor": "white", "showland": true, "showlakes": true, "lakecolor": "white"}, "title": {"x": 0.05}, "mapbox": {"style": "light"}}}, "xaxis": {"anchor": "y", "domain": [0.0, 1.0], "title": {}, "showgrid": false, "gridcolor": "rgba(0,0,0,0.1)"}, "yaxis": {"anchor": "x", "domain": [0.0, 1.0], "title": {"text": "Year Percentage Change (%)"}, "showgrid": true, "gridcolor": "rgba(0,0,0,0.1)", "side": "right"}, "legend": {"title": {"text": ""}, "tracegroupgap": 0, "orientation": "h", "y": 1.15, "x": 0.0}, "margin": {"t": 60, "b": 110}, "font": {"family": "Lato", "size": 16}, "annotations": [{"showarrow": false, "text": "Source: British Retail Consortium - Sensormatic Solutions", "x": 0.01, "xanchor": "left", "xref": "paper", "y": -0.26, "yanchor": "bottom", "yref": "paper"}], "plot_bgcolor": "rgba(255, 255, 255, 0)"}}, "annual": {"data": [{"hovertemplate": "Date: %{x}<br>Value: %{y:.1f}%", "legendgroup": "Total Retail", "line": {"color": "#262262", "dash": "solid"}, "marker": {"symbol": "circle"}, "mode": "lines", "name": "Total Retail", "orientation": "v", "showlegend": true, "x": ["2023", "2024", "2025"], "xaxis": "x", "y": [0.53, -2.31, -0.24], "yaxis": "y", "type": "scatter", "customdata": ["Total Retail", "Total Retail", "Total Retail"]}, {"hovertemplate": "Date: %{x}<br>Value: %{y:.1f}%", "legendgroup": "High Streets", "line": {"color": "#92278F", "dash": "solid"}, "marker": {"symbol": "circle"}, "mode": "lines", "name": "High Streets", "orientation": "v", "showlegend": true, "x": ["2023", "2024", "2025"], "xaxis": "x", "y": [2.4, -2.87, -0.43], "yaxis": "y", "type": "scatter", "customdata": ["High Streets", "High Streets", "High Streets"]}, {"hovertemplate": "Date: %{x}<br>Value: %{y:.1f}%", "legendgroup": "Retail Parks", "line": {"color": "#00BBCE", "dash": "solid"}, "marker": {"symbol": "circle"}, "mode": "lines", "name": "Retail Parks", "orientation": "v", "showlegend": true, "x": ["2023", "2024", "2025"], "xaxis": "x", "y": [-0.73, -0.24, 0.92], "yaxis": "y", "type": "scatter", "customdata": ["Retail Parks", "Retail Parks", "Retail Parks"]}, {"hovertemplate": "Date: %{x}<br>Value: %{y:.1f}%", "legendgroup": "Shopping Centres", "line": {"color": "#6D7378", "dash": "solid"}, "marker": {"symbol": "circle"}, "mode": "lines", "name": "Shopping Centres", "orientation": "v", "showlegend": true, "x": ["2023", "2024", "2025"], "xaxis": "x", "y": [-1.21, -3.06, -0.6], "yaxis": "y", "type": "scatter", "customdata": ["Shopping Centres", "Shopping Centres", "Shopping Centres"]}], "layout": {"template": {"data": {"histogram2dcontour": [{"type": "histogram2dcontour", "colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}], "choropleth": [{"type": "choropleth", "colorbar": {"outlinewidth": 0, "ticks": ""}}], "histogram2d": [{"type": "histogram2d", "colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}], "heatmap": [{"type": "heatmap", "colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}], "contourcarpet": [{"type": "contourcarpet", "colorbar": {"outlinewidth": 0, "ticks": ""}}], "contour": [{"type": "contour", "colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}], "surface": [{"type": "surface", "colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}], "mesh3d": [{"type": "mesh3d", "colorbar": {"outlinewidth": 0, "ticks": ""}}], "scatter": [{"fillpattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}, "type": "scatter"}], "parcoords": [{"type": "parcoords", "line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scatterpolargl": [{"type": "scatterpolargl", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "bar": [{"error_x": {"color": "#2a3f5f"}, "error_y": {"color": "#2a3f5f"}, "marker": {"line": {"color": "#E5ECF6", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "bar"}], "scattergeo": [{"type": "scattergeo", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scatterpolar": [{"type": "scatterpolar", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "histogram": [{"marker": {"pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "histogram"}], "scattergl": [{"type": "scattergl", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scatter3d": [{"type": "scatter3d", "line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scattermap": [{"type": "scattermap", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scattermapbox": [{"type": "scattermapbox", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scatterternary": [{"type": "scatterternary", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scattercarpet": [{"type": "scattercarpet", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "carpet": [{"aaxis": {"endlinecolor": "#2a3f5f", "gridcolor": "white", "linecolor": "white", "minorgridcolor": "white", "startlinecolor": "#2a3f5f"}, "baxis": {"endlinecolor": "#2a3f5f", "gridcolor": "white", "linecolor": "white", "minorgridcolor": "white", "startlinecolor": "#2a3f5f"}, "type": "carpet"}], "table": [{"cells": {"fill": {"color": "#EBF0F8"}, "line": {"color": "white"}}, "header": {"fill": {"color": "#C8D4E3"}, "line": {"color": "white"}}, "type": "table"}], "barpolar": [{"marker": {"line": {"color": "#E5ECF6", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "barpolar"}], "pie": [{"automargin": true, "type": "pie"}]}, "layout": {"autotypenumbers": "strict", "colorway": ["#636efa", "#EF553B", "#00cc96", "#ab63fa", "#FFA15A", "#19d3f3", "#FF6692", "#B6E880", "#FF97FF", "#FECB52"], "font": {"color": "#2a3f5f"}, "hovermode": "closest", "hoverlabel": {"align": "left"}, "paper_bgcolor": "white", "plot_bgcolor": "#E5ECF6", "polar": {"bgcolor": "#E5ECF6", "angularaxis": {"gridcolor": "white", "linecolor": "white", "ticks": ""}, "radialaxis": {"gridcolor": "white", "linecolor": "white", "ticks": ""}}, "ternary": {"bgcolor": "#E5ECF6", "aaxis": {"gridcolor": "white", "linecolor": "white", "ticks": ""}, "baxis": {"gridcolor": "white", "linecolor": "white", "ticks": ""}, "caxis": {"gridcolor": "white", "linecolor": "white", "ticks": ""}}, "coloraxis": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "colorscale": {"sequential": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "sequentialminus": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "diverging": [[0, "#8e0152"], [0.1, "#c51b7d"], [0.2, "#de77ae"], [0.3, "#f1b6da"], [0.4, "#fde0ef"], [0.5, "#f7f7f7"], [0.6, "#e6f5d0"], [0.7, "#b8e186"], [0.8, "#7fbc41"], [0.9, "#4d9221"], [1, "#276419"]]}, "xaxis": {"gridcolor": "white", "linecolor": "white", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "white", "automargin": true, "zerolinewidth": 2}, "yaxis": {"gridcolor": "white", "linecolor": "white", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "white", "automargin": true, "zerolinewidth": 2}, "scene": {"xaxis": {"backgroundcolor": "#E5ECF6", "gridcolor": "white", "linecolor": "white", "showbackground": true, "ticks": "", "zerolinecolor": "white", "gridwidth": 2}, "yaxis": {"backgroundcolor": "#E5ECF6", "gridcolor": "white", "linecolor": "white", "showbackground": true, "ticks": "", "zerolinecolor": "white", "gridwidth": 2}, "zaxis": {"backgroundcolor": "#E5ECF6", "gridcolor": "white", "linecolor": "white", "showbackground": true, "ticks": "", "zerolinecolor": "white", "gridwidth": 2}}, "shapedefaults": {"line": {"color": "#2a3f5f"}}, "annotationdefaults": {"arrowcolor": "#2a3f5f", "arrowhead": 0, "arrowwidth": 1}, "geo": {"bgcolor": "white", "landcolor": "#E5ECF6", "subunitcolor": "white", "showland": true, "showlakes": true, "lakecolor": "white"}, "title": {"x": 0.05}, "mapbox": {"style": "light"}}}, "xaxis": {"anchor": "y", "domain": [0.0, 1.0], "title": {}, "showgrid": false, "gridcolor": "rgba(0,0,0,0.1)"}, "yaxis": {"anchor": "x", "domain": [0.0, 1.0], "title": {"text": "Year Percentage Change (%)"}, "showgrid": true, "gridcolor": "rgba(0,0,0,0.1)", "side": "right"}, "legend": {"title": {"text": ""}, "tracegroupgap": 0, "orientation": "h", "y": 1.15, "x": 0.0}, "margin": {"t": 60, "b": 110}, "font": {"family": "Lato", "size": 16}, "annotations": [{"showarrow": false, "text": "Source: British Retail Consortium - Sensormatic Solutions", "x": 0.01, "xanchor": "left", "xref": "paper", "y": -0.26, "yanchor": "bottom", "yref": "paper"}], "plot_bgcolor": "rgba(255, 255, 255, 0)"}}}
         };
 
+        // BRC color palette for custom chart (8 colors)
+        var customColors = [
+            '#92278F',  // Purple
+            '#00BBCE',  // Light Blue
+            '#262262',  // Dark Blue
+            '#630460',  // Dark Purple
+            '#FFD400',  // Yellow
+            '#F06793',  // Pink
+            '#8CC747',  // Green
+            '#F37021'   // Orange
+        ];
+
+        // Series mapping for custom chart
+        var seriesMapping = {
+            'rsm-total': { dataset: 'rsm', column: 'Total', label: 'Total Sales' },
+            'rsm-food': { dataset: 'rsm', column: 'Food', label: 'Food Sales' },
+            'rsm-nonfood': { dataset: 'rsm', column: 'Non-Food', label: 'Non-Food Sales' },
+            'spi-all': { dataset: 'spi', column: 'All Items', label: 'All Items Prices' },
+            'spi-food': { dataset: 'spi', column: 'Food', label: 'Food Prices' },
+            'spi-nonfood': { dataset: 'spi', column: 'Non-Food', label: 'Non-Food Prices' },
+            'ff-total': { dataset: 'ff', column: 'Total Retail', label: 'Total Retail Footfall' },
+            'ff-highstreets': { dataset: 'ff', column: 'High Streets', label: 'High Streets Footfall' },
+            'ff-retailparks': { dataset: 'ff', column: 'Retail Parks', label: 'Retail Parks Footfall' },
+            'ff-shopping': { dataset: 'ff', column: 'Shopping Centres', label: 'Shopping Centres Footfall' }
+        };
+
+        var customChartDateRange = { start: 0, end: 100 };
+        var allDates = [];
+        var customChartData = [];
+
         var currentFrequency = 'monthly';
         var currentChartType = 'line';
         var currentTab = 'retail-sales';
         var chartsCreated = {
             'retail-sales-chart': false,
             'spi-chart': false,
-            'footfall-chart': false
+            'footfall-chart': false,
+            'custom-chart-area': false
         };
 
         function createChart(chartId, chartType, frequency, displayType) {
@@ -299,6 +550,18 @@
             if (chartsCreated['footfall-chart']) {
                 updateChart('footfall-chart', 'ff', currentFrequency, chartType);
             }
+
+            // Update custom chart if it has selections
+            if (currentTab === 'custom-chart' && customChartData.length > 0) {
+                var checkboxes = document.querySelectorAll('.series-checkbox input[type="checkbox"]:checked');
+                var selectedSeries = [];
+                checkboxes.forEach(function(cb) {
+                    selectedSeries.push(cb.value);
+                });
+                if (selectedSeries.length > 0) {
+                    renderCustomChart(selectedSeries);
+                }
+            }
         }
 
         function changeFrequency(frequency) {
@@ -324,6 +587,18 @@
             }
             if (chartsCreated['footfall-chart']) {
                 updateChart('footfall-chart', 'ff', frequency, currentChartType);
+            }
+
+            // Update custom chart if it has selections
+            if (currentTab === 'custom-chart' && customChartData.length > 0) {
+                var checkboxes = document.querySelectorAll('.series-checkbox input[type="checkbox"]:checked');
+                var selectedSeries = [];
+                checkboxes.forEach(function(cb) {
+                    selectedSeries.push(cb.value);
+                });
+                if (selectedSeries.length > 0) {
+                    renderCustomChart(selectedSeries);
+                }
             }
 
             // Also update the dropdown value to ensure it's in sync
@@ -359,6 +634,12 @@
             document.getElementById(tabName).classList.add("active");
             evt.currentTarget.classList.add("active");
 
+            // Handle custom chart tab differently
+            if (tabName === 'custom-chart') {
+                // No need to create chart - it's managed by checkboxes
+                return;
+            }
+
             // Create or update chart based on tab
             var chartId, chartType;
             if (tabName === 'retail-sales') {
@@ -379,6 +660,210 @@
             setTimeout(function() {
                 Plotly.Plots.resize(chartId);
             }, 50);
+        }
+
+        // Custom chart functions
+        function updateCustomChart() {
+            var checkboxes = document.querySelectorAll('.series-checkbox input[type="checkbox"]');
+            var selectedSeries = [];
+
+            checkboxes.forEach(function(cb) {
+                if (cb.checked) {
+                    selectedSeries.push(cb.value);
+                }
+            });
+
+            // Update selection counter
+            var counter = document.getElementById('selection-counter');
+            counter.textContent = selectedSeries.length + ' / 8 series selected';
+
+            if (selectedSeries.length >= 8) {
+                counter.classList.add('max');
+                // Disable unchecked boxes
+                checkboxes.forEach(function(cb) {
+                    if (!cb.checked) {
+                        cb.disabled = true;
+                    }
+                });
+            } else {
+                counter.classList.remove('max');
+                // Enable all boxes
+                checkboxes.forEach(function(cb) {
+                    cb.disabled = false;
+                });
+            }
+
+            // Show/hide chart
+            if (selectedSeries.length === 0) {
+                document.getElementById('custom-chart-area').style.display = 'none';
+                document.getElementById('custom-chart-placeholder').style.display = 'flex';
+                document.getElementById('date-range-container').style.display = 'none';
+            } else {
+                document.getElementById('custom-chart-area').style.display = 'block';
+                document.getElementById('custom-chart-placeholder').style.display = 'none';
+                document.getElementById('date-range-container').style.display = 'block';
+                renderCustomChart(selectedSeries);
+            }
+        }
+
+        function renderCustomChart(selectedSeries) {
+            var traces = [];
+            var earliestDate = null;
+            var latestDate = null;
+
+            // Build traces for each selected series
+            selectedSeries.forEach(function(seriesId, index) {
+                var mapping = seriesMapping[seriesId];
+                var dataset = chartData[mapping.dataset][currentFrequency];
+
+                // Find the trace in the dataset
+                var sourceTrace = dataset.data.find(function(t) {
+                    return t.name === mapping.column;
+                });
+
+                if (sourceTrace) {
+                    var trace = {
+                        x: sourceTrace.x,
+                        y: sourceTrace.y,
+                        name: mapping.label,
+                        type: currentChartType === 'bar' ? 'bar' : 'scatter',
+                        mode: 'lines',
+                        line: { color: customColors[index % customColors.length], width: 2 }
+                    };
+
+                    if (currentChartType === 'bar') {
+                        trace.marker = { color: customColors[index % customColors.length] };
+                    }
+
+                    traces.push(trace);
+
+                    // Track date range
+                    if (!earliestDate || sourceTrace.x[0] < earliestDate) {
+                        earliestDate = sourceTrace.x[0];
+                    }
+                    if (!latestDate || sourceTrace.x[sourceTrace.x.length - 1] > latestDate) {
+                        latestDate = sourceTrace.x[sourceTrace.x.length - 1];
+                    }
+                }
+            });
+
+            // Store for date range filtering
+            customChartData = traces;
+            allDates = traces[0] ? traces[0].x : [];
+
+            // Update date labels
+            if (allDates.length > 0) {
+                document.getElementById('date-start-label').textContent = allDates[0];
+                document.getElementById('date-end-label').textContent = allDates[allDates.length - 1];
+            }
+
+            var layout = {
+                font: { family: "Lato", size: 16 },
+                xaxis: { showgrid: false, gridcolor: 'rgba(0,0,0,0.1)' },
+                yaxis: { 
+                    title: 'Year Percentage Change (%)',
+                    showgrid: true, 
+                    gridcolor: 'rgba(0,0,0,0.1)', 
+                    side: 'right' 
+                },
+                plot_bgcolor: 'rgba(255, 255, 255, 0)',
+                legend: { orientation: 'h', y: 1.15, x: 0.0 },
+                margin: { b: 60, t: 40 }
+            };
+
+            Plotly.newPlot('custom-chart-area', traces, layout, { responsive: true, displayModeBar: true });
+        }
+
+        function updateDateRange() {
+            var slider = document.getElementById('date-range-start');
+            var startIndex = Math.floor((slider.value / 100) * allDates.length);
+
+            // Filter traces based on date range
+            var filteredTraces = customChartData.map(function(trace) {
+                return {
+                    x: trace.x.slice(startIndex),
+                    y: trace.y.slice(startIndex),
+                    name: trace.name,
+                    type: trace.type,
+                    mode: trace.mode,
+                    line: trace.line,
+                    marker: trace.marker
+                };
+            });
+
+            var layout = {
+                font: { family: "Lato", size: 16 },
+                xaxis: { showgrid: false, gridcolor: 'rgba(0,0,0,0.1)' },
+                yaxis: { 
+                    title: 'Year Percentage Change (%)',
+                    showgrid: true, 
+                    gridcolor: 'rgba(0,0,0,0.1)', 
+                    side: 'right' 
+                },
+                plot_bgcolor: 'rgba(255, 255, 255, 0)',
+                legend: { orientation: 'h', y: 1.15, x: 0.0 },
+                margin: { b: 60, t: 40 }
+            };
+
+            Plotly.react('custom-chart-area', filteredTraces, layout, { responsive: true, displayModeBar: true });
+
+            // Update start label
+            if (allDates[startIndex]) {
+                document.getElementById('date-start-label').textContent = allDates[startIndex];
+            }
+        }
+
+        // Excel export function
+        function exportToExcel() {
+            var data, filename;
+
+            if (currentTab === 'retail-sales') {
+                data = chartData.rsm[currentFrequency].data;
+                filename = 'Retail_Sales_' + currentFrequency + '.xlsx';
+            } else if (currentTab === 'shop-prices') {
+                data = chartData.spi[currentFrequency].data;
+                filename = 'Shop_Prices_' + currentFrequency + '.xlsx';
+            } else if (currentTab === 'footfall') {
+                data = chartData.ff[currentFrequency].data;
+                filename = 'Footfall_' + currentFrequency + '.xlsx';
+            } else if (currentTab === 'custom-chart') {
+                // Export custom chart data
+                if (customChartData.length === 0) {
+                    alert('Please select series to export');
+                    return;
+                }
+                data = customChartData;
+                filename = 'Custom_Chart_' + currentFrequency + '.xlsx';
+            } else {
+                return;
+            }
+
+            // Build worksheet data
+            var wsData = [];
+            var headers = ['Date'];
+
+            data.forEach(function(trace) {
+                headers.push(trace.name);
+            });
+            wsData.push(headers);
+
+            // Assuming all traces have same x-axis (dates)
+            var dates = data[0].x;
+            for (var i = 0; i < dates.length; i++) {
+                var row = [dates[i]];
+                data.forEach(function(trace) {
+                    row.push(trace.y[i]);
+                });
+                wsData.push(row);
+            }
+
+            // Create workbook
+            var wb = XLSX.utils.book_new();
+            var ws = XLSX.utils.aoa_to_sheet(wsData);
+            XLSX.utils.book_append_sheet(wb, ws, "Data");
+
+            // Download
+            XLSX.writeFile(wb, filename);
         }
 
         window.addEventListener('load', function() {
