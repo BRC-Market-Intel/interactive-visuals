@@ -798,13 +798,13 @@
                         y: sourceTrace.y,
                         name: mapping.label,
                         type: currentChartType === 'bar' ? 'bar' : 'scatter',
-                        mode: currentChartType === 'bar' ? undefined : 'lines+markers',
-                        line: currentChartType === 'bar' ? undefined : { color: customColors[index % customColors.length], width: 2 },
-                        marker: currentChartType === 'bar' ? { color: customColors[index % customColors.length] } : { color: customColors[index % customColors.length], size: 4 },
+                        mode: 'lines',
+                        line: { color: customColors[index % customColors.length], width: 2 },
                         connectgaps: false  // Don't connect gaps in data
                     };
 
                     if (currentChartType === 'bar') {
+                        trace.marker = { color: customColors[index % customColors.length] };
                         delete trace.connectgaps;  // Not applicable for bar charts
                         delete trace.mode;
                         delete trace.line;
@@ -819,8 +819,15 @@
                 }
             });
 
-            // Convert set to sorted array - this becomes our master date range
-            allDates = Array.from(allUniqueDates).sort();
+            // Convert set to sorted array - sort chronologically not alphabetically
+            allDates = Array.from(allUniqueDates).sort(function(a, b) {
+                // Convert to comparable format for proper chronological sorting
+                if (a < b) return -1;
+                if (a > b) return 1;
+                return 0;
+            });
+
+            console.log('All dates range:', allDates[0], 'to', allDates[allDates.length - 1], 'Total:', allDates.length);
 
             // Store for date range filtering
             customChartData = traces;
