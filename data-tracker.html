@@ -839,7 +839,11 @@
 
             var layout = {
                 font: { family: "Lato", size: 16 },
-                xaxis: { showgrid: false, gridcolor: 'rgba(0,0,0,0.1)' },
+                xaxis: { 
+                    showgrid: false, 
+                    gridcolor: 'rgba(0,0,0,0.1)',
+                    type: 'category'  // Treat dates as categorical to prevent interpolation
+                },
                 yaxis: { 
                     title: 'Year Percentage Change (%)',
                     showgrid: true, 
@@ -972,7 +976,11 @@
 
             var layout = {
                 font: { family: "Lato", size: 16 },
-                xaxis: { showgrid: false, gridcolor: 'rgba(0,0,0,0.1)' },
+                xaxis: { 
+                    showgrid: false, 
+                    gridcolor: 'rgba(0,0,0,0.1)',
+                    type: 'category'  // Treat dates as categorical to prevent interpolation
+                },
                 yaxis: { 
                     title: 'Year Percentage Change (%)',
                     showgrid: true, 
