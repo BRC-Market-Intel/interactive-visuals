@@ -840,39 +840,45 @@
             var maxSlider = document.getElementById('range-max');
             var sliderRange = document.getElementById('slider-range');
 
+            if (!minSlider || !maxSlider || !sliderRange) return;
+
             var minVal = parseInt(minSlider.value);
             var maxVal = parseInt(maxSlider.value);
 
-            // Prevent sliders from crossing
-            if (minVal >= maxVal) {
-                if (event && event.target.id === 'range-min') {
-                    minSlider.value = maxVal - 1;
-                    minVal = maxVal - 1;
-                } else {
-                    maxSlider.value = minVal + 1;
-                    maxVal = minVal + 1;
-                }
+            // Prevent sliders from crossing - ensure min is always less than max
+            if (minVal > maxVal - 1) {
+                minSlider.value = maxVal - 1;
+                minVal = maxVal - 1;
+            }
+            if (maxVal < minVal + 1) {
+                maxSlider.value = minVal + 1;
+                maxVal = minVal + 1;
             }
 
             // Update visual range indicator
-            var percentMin = minVal;
-            var percentMax = maxVal;
-            sliderRange.style.left = percentMin + '%';
-            sliderRange.style.width = (percentMax - percentMin) + '%';
+            sliderRange.style.left = minVal + '%';
+            sliderRange.style.width = (maxVal - minVal) + '%';
         }
 
         function updateDateRange() {
+            if (allDates.length === 0 || customChartData.length === 0) return;
+
             updateSliderVisual();
 
             var minSlider = document.getElementById('range-min');
             var maxSlider = document.getElementById('range-max');
 
-            var startIndex = Math.floor((minSlider.value / 100) * (allDates.length - 1));
-            var endIndex = Math.ceil((maxSlider.value / 100) * (allDates.length - 1));
+            if (!minSlider || !maxSlider) return;
+
+            var startIndex = Math.floor((parseInt(minSlider.value) / 100) * (allDates.length - 1));
+            var endIndex = Math.ceil((parseInt(maxSlider.value) / 100) * (allDates.length - 1));
 
             // Ensure we have at least one data point
             if (endIndex <= startIndex) {
                 endIndex = startIndex + 1;
+            }
+            if (endIndex >= allDates.length) {
+                endIndex = allDates.length - 1;
             }
 
             // Filter traces based on date range
