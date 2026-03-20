@@ -426,7 +426,7 @@
                     </div>
 
                     <div class="series-group">
-                        <div class="series-group-title">Shop Price Index</div>
+                        <div class="series-group-title">Shop Price Monitor</div>
                         <div class="series-checkbox">
                             <input type="checkbox" id="spi-all" value="spi-all" onchange="updateCustomChart()">
                             <label for="spi-all">All Items</label>
@@ -442,7 +442,7 @@
                     </div>
 
                     <div class="series-group">
-                        <div class="series-group-title">Footfall</div>
+                        <div class="series-group-title">Footfall Monitor</div>
                         <div class="series-checkbox">
                             <input type="checkbox" id="ff-total" value="ff-total" onchange="updateCustomChart()">
                             <label for="ff-total">Total Retail</label>
@@ -1025,11 +1025,54 @@
                 }
                 data = customChartData;
                 filename = 'Custom_Chart_' + currentFrequency + '.xlsx';
+
+                // For custom chart, we need to handle different date ranges per series
+                var allDatesSet = new Set();
+                data.forEach(function(trace) {
+                    trace.x.forEach(function(date) {
+                        allDatesSet.add(date);
+                    });
+                });
+
+                var allDatesSorted = Array.from(allDatesSet).sort(function(a, b) {
+                    if (a < b) return -1;
+                    if (a > b) return 1;
+                    return 0;
+                });
+
+                // Build worksheet with proper alignment
+                var wsData = [];
+                var headers = ['Date'];
+                data.forEach(function(trace) {
+                    headers.push(trace.name);
+                });
+                wsData.push(headers);
+
+                // For each date, find the corresponding value in each series
+                allDatesSorted.forEach(function(date) {
+                    var row = [date];
+                    data.forEach(function(trace) {
+                        var index = trace.x.indexOf(date);
+                        if (index !== -1) {
+                            row.push(trace.y[index]);
+                        } else {
+                            row.push(''); // Empty cell if this series doesn't have data for this date
+                        }
+                    });
+                    wsData.push(row);
+                });
+
+                // Create workbook
+                var wb = XLSX.utils.book_new();
+                var ws = XLSX.utils.aoa_to_sheet(wsData);
+                XLSX.utils.book_append_sheet(wb, ws, "Data");
+                XLSX.writeFile(wb, filename);
+                return;
             } else {
                 return;
             }
 
-            // Build worksheet data
+            // Build worksheet data for non-custom charts
             var wsData = [];
             var headers = ['Date'];
 
@@ -1038,7 +1081,7 @@
             });
             wsData.push(headers);
 
-            // Assuming all traces have same x-axis (dates)
+            // Assuming all traces have same x-axis (dates) for standard charts
             var dates = data[0].x;
             for (var i = 0; i < dates.length; i++) {
                 var row = [dates[i]];
