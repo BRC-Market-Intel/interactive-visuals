@@ -29,6 +29,12 @@
             border-bottom: 1px solid #e0e0e0;
             display: flex;
             align-items: center;
+            gap: 30px;
+        }
+
+        .selector-group {
+            display: flex;
+            align-items: center;
             gap: 15px;
         }
 
@@ -58,6 +64,41 @@
         .frequency-selector select:focus {
             outline: none;
             border-color: #262262;
+        }
+
+        .chart-type-toggle {
+            display: flex;
+            border: 2px solid #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .chart-type-button {
+            padding: 8px 15px;
+            border: none;
+            background: white;
+            cursor: pointer;
+            font-family: 'Lato', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.3s ease;
+            border-right: 1px solid #e0e0e0;
+        }
+
+        .chart-type-button:last-child {
+            border-right: none;
+        }
+
+        .chart-type-button:hover {
+            background: #f5f5f5;
+            color: #262262;
+        }
+
+        .chart-type-button.active {
+            background: #262262;
+            color: white;
         }
 
         .tabs {
@@ -121,12 +162,22 @@
 <body>
     <div class="tab-container">
         <div class="frequency-selector">
-            <label for="frequency-select">Frequency:</label>
-            <select id="frequency-select" onchange="changeFrequency(this.value)">
-                <option value="monthly" selected>Monthly</option>
-                <option value="quarterly">Quarterly</option>
-                <option value="annual">Annual</option>
-            </select>
+            <div class="selector-group">
+                <label for="frequency-select">Frequency:</label>
+                <select id="frequency-select" onchange="changeFrequency(this.value)">
+                    <option value="monthly" selected>Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="annual">Annual</option>
+                </select>
+            </div>
+
+            <div class="selector-group">
+                <label>Chart Type:</label>
+                <div class="chart-type-toggle">
+                    <button class="chart-type-button active" onclick="changeChartType('line')">Line</button>
+                    <button class="chart-type-button" onclick="changeChartType('bar')">Bar</button>
+                </div>
+            </div>
         </div>
 
         <div class="tabs">
@@ -157,6 +208,7 @@
         };
 
         var currentFrequency = 'monthly';
+        var currentChartType = 'line';
         var currentTab = 'retail-sales';
         var chartsCreated = {
             'retail-sales-chart': false,
@@ -164,7 +216,7 @@
             'footfall-chart': false
         };
 
-        function createChart(chartId, chartType, frequency) {
+        function createChart(chartId, chartType, frequency, displayType) {
             var data, layout;
 
             if (chartType === 'rsm') {
@@ -178,11 +230,18 @@
                 layout = chartData.ff[frequency].layout;
             }
 
+            // Convert to bar chart if needed
+            if (displayType === 'bar') {
+                data = data.map(function(trace) {
+                    return Object.assign({}, trace, {type: 'bar'});
+                });
+            }
+
             Plotly.newPlot(chartId, data, layout, {responsive: true, displayModeBar: true});
             chartsCreated[chartId] = true;
         }
 
-        function updateChart(chartId, chartType, frequency) {
+        function updateChart(chartId, chartType, frequency, displayType) {
             var data, layout;
 
             if (chartType === 'rsm') {
@@ -194,6 +253,13 @@
             } else if (chartType === 'ff') {
                 data = chartData.ff[frequency].data;
                 layout = chartData.ff[frequency].layout;
+            }
+
+            // Convert to bar chart if needed
+            if (displayType === 'bar') {
+                data = data.map(function(trace) {
+                    return Object.assign({}, trace, {type: 'bar'});
+                });
             }
 
             // Use Plotly.react to update the chart efficiently
@@ -203,22 +269,66 @@
             }
         }
 
+        function changeChartType(chartType) {
+            currentChartType = chartType;
+
+            // Update button states
+            var buttons = document.getElementsByClassName('chart-type-button');
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove('active');
+            }
+            event.currentTarget.classList.add('active');
+
+            // Update all created charts
+            if (chartsCreated['retail-sales-chart']) {
+                updateChart('retail-sales-chart', 'rsm', currentFrequency, chartType);
+            }
+            if (chartsCreated['spi-chart']) {
+                updateChart('spi-chart', 'spi', currentFrequency, chartType);
+            }
+            if (chartsCreated['footfall-chart']) {
+                updateChart('footfall-chart', 'ff', currentFrequency, chartType);
+            }
+        }
+
         function changeFrequency(frequency) {
             currentFrequency = frequency;
 
+            // Auto-switch chart type based on frequency
+            if (frequency === 'annual' && currentChartType === 'line') {
+                currentChartType = 'bar';
+                updateChartTypeButtons('bar');
+            } else if (frequency !== 'annual' && currentChartType === 'bar') {
+                // Optional: switch back to line for monthly/quarterly
+                // Remove these lines if you want to keep user's manual selection
+                currentChartType = 'line';
+                updateChartTypeButtons('line');
+            }
+
             // Update all charts - create them if they don't exist yet
             if (chartsCreated['retail-sales-chart']) {
-                updateChart('retail-sales-chart', 'rsm', frequency);
+                updateChart('retail-sales-chart', 'rsm', frequency, currentChartType);
             }
             if (chartsCreated['spi-chart']) {
-                updateChart('spi-chart', 'spi', frequency);
+                updateChart('spi-chart', 'spi', frequency, currentChartType);
             }
             if (chartsCreated['footfall-chart']) {
-                updateChart('footfall-chart', 'ff', frequency);
+                updateChart('footfall-chart', 'ff', frequency, currentChartType);
             }
 
             // Also update the dropdown value to ensure it's in sync
             document.getElementById('frequency-select').value = frequency;
+        }
+
+        function updateChartTypeButtons(chartType) {
+            var buttons = document.getElementsByClassName('chart-type-button');
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove('active');
+                if ((chartType === 'line' && buttons[i].textContent === 'Line') ||
+                    (chartType === 'bar' && buttons[i].textContent === 'Bar')) {
+                    buttons[i].classList.add('active');
+                }
+            }
         }
 
         function openTab(evt, tabName) {
@@ -253,7 +363,7 @@
             }
 
             if (!chartsCreated[chartId]) {
-                createChart(chartId, chartType, currentFrequency);
+                createChart(chartId, chartType, currentFrequency, currentChartType);
             }
 
             setTimeout(function() {
@@ -262,7 +372,7 @@
         }
 
         window.addEventListener('load', function() {
-            createChart('retail-sales-chart', 'rsm', 'monthly');
+            createChart('retail-sales-chart', 'rsm', 'monthly', 'line');
         });
     </script>
 </body>
