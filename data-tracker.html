@@ -878,19 +878,9 @@
                 return;
             }
 
+            // Get the actual date range based on slider positions
             var startIndex = Math.floor((parseInt(minSlider.value) / 100) * (allDates.length - 1));
             var endIndex = Math.ceil((parseInt(maxSlider.value) / 100) * (allDates.length - 1));
-
-            console.log('Date Range Update:', {
-                frequency: currentFrequency,
-                minSliderValue: minSlider.value,
-                maxSliderValue: maxSlider.value,
-                allDatesLength: allDates.length,
-                startIndex: startIndex,
-                endIndex: endIndex,
-                startDate: allDates[startIndex],
-                endDate: allDates[endIndex]
-            });
 
             // Ensure we have at least one data point
             if (endIndex <= startIndex) {
@@ -900,11 +890,48 @@
                 endIndex = allDates.length - 1;
             }
 
-            // Filter traces based on date range - deep copy to avoid reference issues
+            // Get the actual start and end dates
+            var startDate = allDates[startIndex];
+            var endDate = allDates[endIndex];
+
+            console.log('Date Range Update:', {
+                frequency: currentFrequency,
+                startDate: startDate,
+                endDate: endDate,
+                startIndex: startIndex,
+                endIndex: endIndex
+            });
+
+            // Filter each trace based on its own date values within the selected range
             var filteredTraces = customChartData.map(function(trace) {
+                // Find indices in this trace's x array that fall within the date range
+                var traceStartIndex = 0;
+                var traceEndIndex = trace.x.length - 1;
+
+                // Find first index where x >= startDate
+                for (var i = 0; i < trace.x.length; i++) {
+                    if (trace.x[i] >= startDate) {
+                        traceStartIndex = i;
+                        break;
+                    }
+                }
+
+                // Find last index where x <= endDate
+                for (var i = trace.x.length - 1; i >= 0; i--) {
+                    if (trace.x[i] <= endDate) {
+                        traceEndIndex = i;
+                        break;
+                    }
+                }
+
+                // Ensure at least one point
+                if (traceEndIndex < traceStartIndex) {
+                    traceEndIndex = traceStartIndex;
+                }
+
                 var filteredTrace = {
-                    x: trace.x.slice(startIndex, endIndex + 1),
-                    y: trace.y.slice(startIndex, endIndex + 1),
+                    x: trace.x.slice(traceStartIndex, traceEndIndex + 1),
+                    y: trace.y.slice(traceStartIndex, traceEndIndex + 1),
                     name: trace.name,
                     type: trace.type || 'scatter',
                     mode: trace.mode || 'lines'
@@ -920,7 +947,7 @@
                     filteredTrace.marker = JSON.parse(JSON.stringify(trace.marker));
                 }
 
-                console.log('Filtered trace:', trace.name, 'from', trace.x.length, 'to', filteredTrace.x.length, 'points');
+                console.log('Filtered trace:', trace.name, 'from', trace.x.length, 'to', filteredTrace.x.length, 'points', 'range:', filteredTrace.x[0], 'to', filteredTrace.x[filteredTrace.x.length - 1]);
                 return filteredTrace;
             });
 
@@ -941,12 +968,8 @@
             Plotly.react('custom-chart-area', filteredTraces, layout, { responsive: true, displayModeBar: true });
 
             // Update labels
-            if (allDates[startIndex]) {
-                document.getElementById('date-start-label').textContent = allDates[startIndex];
-            }
-            if (allDates[endIndex]) {
-                document.getElementById('date-end-label').textContent = allDates[endIndex];
-            }
+            document.getElementById('date-start-label').textContent = startDate;
+            document.getElementById('date-end-label').textContent = endDate;
         }
 
         // Excel export function
