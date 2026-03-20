@@ -800,11 +800,13 @@
                         name: mapping.label,
                         type: currentChartType === 'bar' ? 'bar' : 'scatter',
                         mode: 'lines',
-                        line: { color: customColors[index % customColors.length], width: 2 }
+                        line: { color: customColors[index % customColors.length], width: 2 },
+                        connectgaps: false  // Don't connect gaps in data
                     };
 
                     if (currentChartType === 'bar') {
                         trace.marker = { color: customColors[index % customColors.length] };
+                        delete trace.connectgaps;  // Not applicable for bar charts
                     }
 
                     traces.push(trace);
@@ -949,7 +951,8 @@
                     y: trace.y.slice(traceStartIndex, traceEndIndex + 1),
                     name: trace.name,
                     type: trace.type || 'scatter',
-                    mode: trace.mode || 'lines'
+                    mode: trace.mode || 'lines',
+                    connectgaps: false  // Don't connect gaps in data
                 };
 
                 // Copy line properties if they exist
@@ -960,6 +963,7 @@
                 // Copy marker properties if they exist
                 if (trace.marker) {
                     filteredTrace.marker = JSON.parse(JSON.stringify(trace.marker));
+                    delete filteredTrace.connectgaps;  // Not applicable for bar charts
                 }
 
                 console.log('Filtered trace:', trace.name, 'from', trace.x.length, 'to', filteredTrace.x.length, 'points', 'range:', filteredTrace.x[0], 'to', filteredTrace.x[filteredTrace.x.length - 1]);
