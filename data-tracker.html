@@ -233,7 +233,12 @@
             // Convert to bar chart if needed
             if (displayType === 'bar') {
                 data = data.map(function(trace) {
-                    return Object.assign({}, trace, {type: 'bar'});
+                    return Object.assign({}, trace, {
+                        type: 'bar',
+                        marker: {
+                            color: trace.line ? trace.line.color : trace.marker.color
+                        }
+                    });
                 });
             }
 
@@ -258,7 +263,12 @@
             // Convert to bar chart if needed
             if (displayType === 'bar') {
                 data = data.map(function(trace) {
-                    return Object.assign({}, trace, {type: 'bar'});
+                    return Object.assign({}, trace, {
+                        type: 'bar',
+                        marker: {
+                            color: trace.line ? trace.line.color : trace.marker.color
+                        }
+                    });
                 });
             }
 
