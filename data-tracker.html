@@ -766,6 +766,7 @@
             var traces = [];
             var earliestDate = null;
             var latestDate = null;
+            var allXValues = [];
 
             // Build traces for each selected series
             selectedSeries.forEach(function(seriesId, index) {
@@ -793,24 +794,25 @@
 
                     traces.push(trace);
 
-                    // Track date range
-                    if (!earliestDate || sourceTrace.x[0] < earliestDate) {
-                        earliestDate = sourceTrace.x[0];
-                    }
-                    if (!latestDate || sourceTrace.x[sourceTrace.x.length - 1] > latestDate) {
-                        latestDate = sourceTrace.x[sourceTrace.x.length - 1];
+                    // Collect all x values to find the union of dates
+                    if (allXValues.length === 0 || sourceTrace.x.length > allXValues.length) {
+                        allXValues = sourceTrace.x;
                     }
                 }
             });
 
-            // Store for date range filtering
+            // Store for date range filtering - use the longest x-axis as reference
             customChartData = traces;
-            allDates = traces[0] ? traces[0].x : [];
+            allDates = allXValues.slice(); // Make a copy
 
             // Reset sliders to full range
-            document.getElementById('range-min').value = 0;
-            document.getElementById('range-max').value = 100;
-            updateSliderVisual();
+            var minSlider = document.getElementById('range-min');
+            var maxSlider = document.getElementById('range-max');
+            if (minSlider && maxSlider) {
+                minSlider.value = 0;
+                maxSlider.value = 100;
+                updateSliderVisual();
+            }
 
             // Update date labels
             if (allDates.length > 0) {
