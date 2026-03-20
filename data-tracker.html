@@ -863,17 +863,34 @@
         }
 
         function updateDateRange() {
-            if (allDates.length === 0 || customChartData.length === 0) return;
+            if (allDates.length === 0 || customChartData.length === 0) {
+                console.log('No data available for date range update');
+                return;
+            }
 
             updateSliderVisual();
 
             var minSlider = document.getElementById('range-min');
             var maxSlider = document.getElementById('range-max');
 
-            if (!minSlider || !maxSlider) return;
+            if (!minSlider || !maxSlider) {
+                console.log('Sliders not found');
+                return;
+            }
 
             var startIndex = Math.floor((parseInt(minSlider.value) / 100) * (allDates.length - 1));
             var endIndex = Math.ceil((parseInt(maxSlider.value) / 100) * (allDates.length - 1));
+
+            console.log('Date Range Update:', {
+                frequency: currentFrequency,
+                minSliderValue: minSlider.value,
+                maxSliderValue: maxSlider.value,
+                allDatesLength: allDates.length,
+                startIndex: startIndex,
+                endIndex: endIndex,
+                startDate: allDates[startIndex],
+                endDate: allDates[endIndex]
+            });
 
             // Ensure we have at least one data point
             if (endIndex <= startIndex) {
@@ -885,7 +902,7 @@
 
             // Filter traces based on date range
             var filteredTraces = customChartData.map(function(trace) {
-                return {
+                var filteredTrace = {
                     x: trace.x.slice(startIndex, endIndex + 1),
                     y: trace.y.slice(startIndex, endIndex + 1),
                     name: trace.name,
@@ -894,6 +911,8 @@
                     line: trace.line,
                     marker: trace.marker
                 };
+                console.log('Filtered trace:', trace.name, 'from', trace.x.length, 'to', filteredTrace.x.length, 'points');
+                return filteredTrace;
             });
 
             var layout = {
