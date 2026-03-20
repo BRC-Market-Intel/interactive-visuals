@@ -900,17 +900,26 @@
                 endIndex = allDates.length - 1;
             }
 
-            // Filter traces based on date range
+            // Filter traces based on date range - deep copy to avoid reference issues
             var filteredTraces = customChartData.map(function(trace) {
                 var filteredTrace = {
                     x: trace.x.slice(startIndex, endIndex + 1),
                     y: trace.y.slice(startIndex, endIndex + 1),
                     name: trace.name,
-                    type: trace.type,
-                    mode: trace.mode,
-                    line: trace.line,
-                    marker: trace.marker
+                    type: trace.type || 'scatter',
+                    mode: trace.mode || 'lines'
                 };
+
+                // Copy line properties if they exist
+                if (trace.line) {
+                    filteredTrace.line = JSON.parse(JSON.stringify(trace.line));
+                }
+
+                // Copy marker properties if they exist
+                if (trace.marker) {
+                    filteredTrace.marker = JSON.parse(JSON.stringify(trace.marker));
+                }
+
                 console.log('Filtered trace:', trace.name, 'from', trace.x.length, 'to', filteredTrace.x.length, 'points');
                 return filteredTrace;
             });
