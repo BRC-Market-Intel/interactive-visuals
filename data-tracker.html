@@ -40,20 +40,27 @@
         }
 
         .date-range-group {
-            flex-direction: column;
-            align-items: flex-start;
-            min-width: 200px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            min-width: 280px;
         }
 
         .date-range-group label {
-            margin-bottom: 2px;
             font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .date-range-controls {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
         }
 
         .date-range-group .dual-range-slider {
             width: 100%;
             height: 25px;
-            margin: 3px 0;
+            margin: 0 0 2px 0;
         }
 
         .date-range-group .date-labels {
@@ -406,15 +413,17 @@
 
             <div class="selector-group date-range-group" id="top-date-range-group">
                 <label>Date Range:</label>
-                <div class="dual-range-slider">
-                    <div class="slider-track"></div>
-                    <div class="slider-range" id="top-slider-range"></div>
-                    <input type="range" id="top-range-min" min="0" max="100" value="0" oninput="updateTopDateRange()">
-                    <input type="range" id="top-range-max" min="0" max="100" value="100" oninput="updateTopDateRange()">
-                </div>
-                <div class="date-labels">
-                    <span id="top-date-start-label"></span>
-                    <span id="top-date-end-label"></span>
+                <div class="date-range-controls">
+                    <div class="dual-range-slider">
+                        <div class="slider-track"></div>
+                        <div class="slider-range" id="top-slider-range"></div>
+                        <input type="range" id="top-range-min" min="0" max="100" value="0" oninput="updateTopDateRange()">
+                        <input type="range" id="top-range-max" min="0" max="100" value="100" oninput="updateTopDateRange()">
+                    </div>
+                    <div class="date-labels">
+                        <span id="top-date-start-label"></span>
+                        <span id="top-date-end-label"></span>
+                    </div>
                 </div>
             </div>
 
@@ -750,7 +759,11 @@
 
             // Handle custom chart tab differently
             if (tabName === 'custom-chart') {
-                // No need to create chart - it's managed by checkboxes
+                // Don't create chart - it's managed by checkboxes
+                // If there's already custom chart data, initialize its date range
+                if (allDates.length > 0) {
+                    initializeTopDateRange(allDates);
+                }
                 return;
             }
 
@@ -769,6 +782,12 @@
 
             if (!chartsCreated[chartId]) {
                 createChart(chartId, chartType, currentFrequency, currentChartType);
+            } else {
+                // Chart already exists, just reinitialize the date range for this tab
+                var dataset = chartData[chartType][currentFrequency];
+                if (dataset && dataset.data && dataset.data.length > 0 && dataset.data[0].x) {
+                    initializeTopDateRange(dataset.data[0].x);
+                }
             }
 
             setTimeout(function() {
