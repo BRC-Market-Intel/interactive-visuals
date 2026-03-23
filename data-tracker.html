@@ -150,36 +150,36 @@
         }
 
         .series-selector {
-            width: 300px;
+            width: 280px;
             background: #f8f8f8;
-            padding: 20px;
+            padding: 15px;
             border-radius: 8px;
             overflow-y: auto;
-            max-height: 600px;
+            max-height: 550px;
         }
 
         .series-selector h3 {
-            margin: 0 0 15px 0;
+            margin: 0 0 12px 0;
             color: #262262;
             font-size: 16px;
             font-weight: 600;
         }
 
         .series-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .series-group-title {
             font-weight: 600;
             color: #262262;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             font-size: 14px;
         }
 
         .series-checkbox {
             display: flex;
             align-items: center;
-            margin: 8px 0;
+            margin: 6px 0;
             cursor: pointer;
         }
 
@@ -202,8 +202,8 @@
         }
 
         .selection-counter {
-            margin-top: 15px;
-            padding: 10px;
+            margin-top: 12px;
+            padding: 8px;
             background: white;
             border-radius: 4px;
             text-align: center;
@@ -888,8 +888,8 @@
                     side: 'right' 
                 },
                 plot_bgcolor: 'rgba(255, 255, 255, 0)',
-                legend: { orientation: 'h', y: 1.15, x: 0.0 },
-                margin: { b: 60, t: 40 }
+                legend: { orientation: 'h', y: 1.18, x: 0.0 },
+                margin: { b: 60, t: 50 }
             };
 
             Plotly.newPlot('custom-chart-area', traces, layout, { responsive: true, displayModeBar: true });
@@ -1098,8 +1098,8 @@
                     side: 'right' 
                 },
                 plot_bgcolor: 'rgba(255, 255, 255, 0)',
-                legend: { orientation: 'h', y: 1.15, x: 0.0 },
-                margin: { b: 60, t: 40 }
+                legend: { orientation: 'h', y: 1.18, x: 0.0 },
+                margin: { b: 60, t: 50 }
             };
 
             Plotly.react('custom-chart-area', filteredTraces, layout, { responsive: true, displayModeBar: true });
