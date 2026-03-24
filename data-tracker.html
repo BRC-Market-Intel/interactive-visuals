@@ -722,6 +722,23 @@
                 if (selectedSeries.length > 0) {
                     renderCustomChart(selectedSeries);
                 }
+            } else {
+                // For standard tabs, reinitialize date range with new frequency dates
+                var chartType;
+                if (currentTab === 'retail-sales') {
+                    chartType = 'rsm';
+                } else if (currentTab === 'shop-prices') {
+                    chartType = 'spi';
+                } else if (currentTab === 'footfall') {
+                    chartType = 'ff';
+                }
+
+                if (chartType) {
+                    var dataset = chartData[chartType][frequency];
+                    if (dataset && dataset.data && dataset.data.length > 0 && dataset.data[0].x) {
+                        initializeTopDateRange(dataset.data[0].x);
+                    }
+                }
             }
 
             // Also update the dropdown value to ensure it's in sync
