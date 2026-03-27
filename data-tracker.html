@@ -524,7 +524,7 @@
             </div>
 
             <button class="view-questions-button" id="view-questions-btn" onclick="openQuestionsModal()">
-                <span style="margin-right: 5px;">ℹ️</span> Sentiment Qs
+                <span style="margin-right: 5px;">ℹ️</span> Sentiment Questions
             </button>
             <button class="export-button" onclick="exportToExcel()">Export to Excel</button>
         </div>
@@ -1095,17 +1095,20 @@
             var hasCSM = false;
             var hasOther = false;
 
-            // Build traces for each selected series
-            selectedSeries.forEach(function(seriesId, index) {
+            // First pass: check what types of data we have
+            selectedSeries.forEach(function(seriesId) {
                 var mapping = seriesMapping[seriesId];
-                var dataset = chartData[mapping.dataset][currentFrequency];
-
-                // Track which types of data we have
                 if (mapping.dataset === 'csm') {
                     hasCSM = true;
                 } else {
                     hasOther = true;
                 }
+            });
+
+            // Build traces for each selected series
+            selectedSeries.forEach(function(seriesId, index) {
+                var mapping = seriesMapping[seriesId];
+                var dataset = chartData[mapping.dataset][currentFrequency];
 
                 // Find the trace in the dataset
                 var sourceTrace = dataset.data.find(function(t) {
@@ -1113,6 +1116,16 @@
                 });
 
                 if (sourceTrace) {
+                    // Determine which y-axis to use based on data mix
+                    var useYAxis;
+                    if (hasCSM && hasOther) {
+                        // Both types: CSM on left (y), others on right (y2)
+                        useYAxis = mapping.dataset === 'csm' ? 'y' : 'y2';
+                    } else {
+                        // Only one type: always use primary y-axis (y)
+                        useYAxis = 'y';
+                    }
+
                     var trace = {
                         x: sourceTrace.x,
                         y: sourceTrace.y,
@@ -1121,7 +1134,7 @@
                         mode: 'lines',
                         line: { color: customColors[index % customColors.length], width: 2 },
                         connectgaps: false,  // Don't connect gaps in data
-                        yaxis: mapping.dataset === 'csm' ? 'y' : 'y2',  // CSM on left (y), others on right (y2)
+                        yaxis: useYAxis,
                         hovertemplate: mapping.dataset === 'csm' ? 'Date: %{x}<br>Value: %{y:.0f}' : 'Date: %{x}<br>Value: %{y:.1f}%'
                     };
 
