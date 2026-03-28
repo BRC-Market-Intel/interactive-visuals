@@ -1192,6 +1192,10 @@
                         currentDateRange.min = percentageStart;
                         updateTopSliderVisual();
 
+                        // Update the date labels to show the reframed range
+                        document.getElementById('top-date-start-label').textContent = latestStartDate;
+                        document.getElementById('top-date-end-label').textContent = allDates[allDates.length - 1];
+
                         // Update the chart with the new date range
                         var startDate = allDates[startIndex];
                         var endDate = allDates[allDates.length - 1];
