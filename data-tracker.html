@@ -1166,8 +1166,40 @@
             // Store for date range filtering
             customChartData = traces;
 
+            // Find the latest start date across all selected series (auto-reframe)
+            var latestStartDate = null;
+            traces.forEach(function(trace) {
+                if (trace.x && trace.x.length > 0) {
+                    var traceStartDate = trace.x[0];
+                    if (!latestStartDate || parseDateForSorting(traceStartDate) > parseDateForSorting(latestStartDate)) {
+                        latestStartDate = traceStartDate;
+                    }
+                }
+            });
+
             // Initialize top date range slider with all unique dates
             initializeTopDateRange(allDates);
+
+            // Auto-reframe to start from latest start date (removes confusion from missing early data)
+            if (latestStartDate && allDates.length > 0) {
+                var startIndex = allDates.indexOf(latestStartDate);
+                if (startIndex > 0) {
+                    // Set the slider to start from the latest start date
+                    var minSlider = document.getElementById('top-range-min');
+                    if (minSlider && allDates.length > 1) {
+                        var percentageStart = (startIndex / (allDates.length - 1)) * 100;
+                        minSlider.value = percentageStart;
+                        currentDateRange.min = percentageStart;
+                        updateTopSliderVisual();
+
+                        // Update the chart with the new date range
+                        var startDate = allDates[startIndex];
+                        var endDate = allDates[allDates.length - 1];
+                        updateCustomChartDateRange(startDate, endDate);
+                        return; // Exit early since we're calling updateCustomChartDateRange
+                    }
+                }
+            }
 
             var layout = {
                 font: { family: "Lato", size: 16 },
