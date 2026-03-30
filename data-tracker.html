@@ -844,7 +844,8 @@
                         type: 'bar',
                         marker: {
                             color: trace.line ? trace.line.color : trace.marker.color
-                        }
+                        },
+                        textposition: 'none'  // Remove labels on bars
                     });
                 });
             }
@@ -882,7 +883,8 @@
                         type: 'bar',
                         marker: {
                             color: trace.line ? trace.line.color : trace.marker.color
-                        }
+                        },
+                        textposition: 'none'  // Remove labels on bars
                     });
                 });
             }
@@ -1159,6 +1161,7 @@
 
                     if (currentChartType === 'bar') {
                         trace.marker = { color: customColors[index % customColors.length] };
+                        trace.textposition = 'none';  // Remove labels on bars
                         delete trace.connectgaps;  // Not applicable for bar charts
                         delete trace.mode;
                         delete trace.line;
