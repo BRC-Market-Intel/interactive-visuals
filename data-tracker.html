@@ -968,7 +968,14 @@
                 if (selectedSeries.length > 0) {
                     renderCustomChart(selectedSeries);
                 }
-            } else {
+            }
+
+            // Update checkbox states based on new frequency (for annual CSM restriction)
+            if (currentTab === 'custom-chart') {
+                updateCustomChart();
+            }
+
+            if (currentTab !== 'custom-chart') {
                 // For standard tabs, reinitialize date range with new frequency dates
                 var chartType;
                 if (currentTab === 'retail-sales') {
@@ -1077,6 +1084,25 @@
                 }
             });
 
+            // In annual view only: prevent mixing CSM with other series
+            if (currentFrequency === 'annual') {
+                var hasCSM = selectedSeries.some(function(s) { return s.startsWith('csm-'); });
+                var hasOther = selectedSeries.some(function(s) { return !s.startsWith('csm-'); });
+
+                checkboxes.forEach(function(cb) {
+                    if (!cb.checked) {
+                        // If CSM is selected, disable non-CSM checkboxes
+                        if (hasCSM && !cb.value.startsWith('csm-')) {
+                            cb.disabled = true;
+                        }
+                        // If non-CSM is selected, disable CSM checkboxes
+                        else if (hasOther && cb.value.startsWith('csm-')) {
+                            cb.disabled = true;
+                        }
+                    }
+                });
+            }
+
             // Update selection counter
             var counter = document.getElementById('selection-counter');
             counter.textContent = selectedSeries.length + ' / 8 series selected';
@@ -1089,12 +1115,15 @@
                         cb.disabled = true;
                     }
                 });
-            } else {
+            } else if (currentFrequency !== 'annual') {
+                // Only re-enable if not in annual mode (annual has its own rules above)
                 counter.classList.remove('max');
                 // Enable all boxes
                 checkboxes.forEach(function(cb) {
                     cb.disabled = false;
                 });
+            } else {
+                counter.classList.remove('max');
             }
 
             // Show/hide chart
@@ -1149,20 +1178,25 @@
                     var trace = {
                         x: sourceTrace.x,
                         y: sourceTrace.y,
-                        text: sourceTrace.x.map(formatDateForHover),  // Format dates as "Jan 2025" for hover
                         name: mapping.label,
                         type: currentChartType === 'bar' ? 'bar' : 'scatter',
                         mode: 'lines',
                         line: { color: customColors[index % customColors.length], width: 2 },
                         connectgaps: false,  // Don't connect gaps in data
-                        yaxis: useYAxis,
-                        hovertemplate: mapping.dataset === 'csm' ? 'Date: %{text}<br>Value: %{y:.0f}' : 'Date: %{text}<br>Value: %{y:.1f}%'
+                        yaxis: useYAxis
                     };
+
+                    // Add text and hovertemplate only for non-bar charts
+                    if (currentChartType !== 'bar') {
+                        trace.text = sourceTrace.x.map(formatDateForHover);
+                        trace.hovertemplate = mapping.dataset === 'csm' ? 'Date: %{text}<br>Value: %{y:.0f}' : 'Date: %{text}<br>Value: %{y:.1f}%';
+                    } else {
+                        // For bar charts, use simpler hover without text field
+                        trace.hovertemplate = mapping.dataset === 'csm' ? 'Date: %{x}<br>Value: %{y:.0f}' : 'Date: %{x}<br>Value: %{y:.1f}%';
+                    }
 
                     if (currentChartType === 'bar') {
                         trace.marker = { color: customColors[index % customColors.length] };
-                        trace.textposition = 'none';  // Prevent text labels
-                        trace.texttemplate = '';  // Also set empty template
                         delete trace.connectgaps;  // Not applicable for bar charts
                         delete trace.mode;
                         delete trace.line;
