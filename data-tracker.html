@@ -1156,12 +1156,12 @@
                         line: { color: customColors[index % customColors.length], width: 2 },
                         connectgaps: false,  // Don't connect gaps in data
                         yaxis: useYAxis,
-                        hovertemplate: mapping.dataset === 'csm' ? 'Date: %{text}<br>Value: %{y:.0f}' : 'Date: %{text}<br>Value: %{y:.1f}%'
+                        hovertemplate: mapping.dataset === 'csm' ? 'Date: %{text}<br>Value: %{y:.0f}' : 'Date: %{text}<br>Value: %{y:.1f}%',
+                        texttemplate: currentChartType === 'bar' ? '' : undefined  // Prevent labels on bars
                     };
 
                     if (currentChartType === 'bar') {
                         trace.marker = { color: customColors[index % customColors.length] };
-                        trace.texttemplate = '';  // Prevent text from displaying on bars but keep for hover
                         delete trace.connectgaps;  // Not applicable for bar charts
                         delete trace.mode;
                         delete trace.line;
@@ -1236,7 +1236,8 @@
                 },
                 plot_bgcolor: 'rgba(255, 255, 255, 0)',
                 legend: { orientation: 'h', y: 1.18, x: 0.0 },
-                margin: { b: 60, t: 50 }
+                margin: { b: 60, t: 50 },
+                barmode: currentChartType === 'bar' ? 'group' : undefined  // Group bars side by side
             };
 
             // Configure y-axes based on what data is present
@@ -1246,13 +1247,15 @@
                     title: 'Net Balance',
                     showgrid: true,
                     gridcolor: 'rgba(0,0,0,0.1)',
-                    side: 'left'
+                    side: 'left',
+                    rangemode: currentChartType === 'bar' ? 'tozero' : 'normal'
                 };
                 layout.yaxis2 = {
                     title: 'Year Percentage Change (%)',
                     showgrid: false,
                     overlaying: 'y',
-                    side: 'right'
+                    side: 'right',
+                    rangemode: currentChartType === 'bar' ? 'tozero' : 'normal'
                 };
             } else if (hasCSM) {
                 // Only CSM: left axis
@@ -1260,7 +1263,8 @@
                     title: 'Net Balance',
                     showgrid: true,
                     gridcolor: 'rgba(0,0,0,0.1)',
-                    side: 'left'
+                    side: 'left',
+                    rangemode: currentChartType === 'bar' ? 'tozero' : 'normal'
                 };
             } else {
                 // Only RSM/SPM/FFM: right axis
@@ -1268,7 +1272,8 @@
                     title: 'Year Percentage Change (%)',
                     showgrid: true,
                     gridcolor: 'rgba(0,0,0,0.1)',
-                    side: 'right'
+                    side: 'right',
+                    rangemode: currentChartType === 'bar' ? 'tozero' : 'normal'
                 };
             }
 
@@ -1494,7 +1499,8 @@
                 },
                 plot_bgcolor: 'rgba(255, 255, 255, 0)',
                 legend: { orientation: 'h', y: 1.18, x: 0.0 },
-                margin: { b: 60, t: 50 }
+                margin: { b: 60, t: 50 },
+                barmode: currentChartType === 'bar' ? 'group' : undefined  // Group bars side by side
             };
 
             // Configure y-axes based on what data is present
@@ -1504,13 +1510,15 @@
                     title: 'Net Balance',
                     showgrid: true,
                     gridcolor: 'rgba(0,0,0,0.1)',
-                    side: 'left'
+                    side: 'left',
+                    rangemode: currentChartType === 'bar' ? 'tozero' : 'normal'
                 };
                 layout.yaxis2 = {
                     title: 'Year Percentage Change (%)',
                     showgrid: false,
                     overlaying: 'y',
-                    side: 'right'
+                    side: 'right',
+                    rangemode: currentChartType === 'bar' ? 'tozero' : 'normal'
                 };
             } else if (hasCSM) {
                 // Only CSM: left axis
@@ -1518,7 +1526,8 @@
                     title: 'Net Balance',
                     showgrid: true,
                     gridcolor: 'rgba(0,0,0,0.1)',
-                    side: 'left'
+                    side: 'left',
+                    rangemode: currentChartType === 'bar' ? 'tozero' : 'normal'
                 };
             } else {
                 // Only RSM/SPM/FFM: right axis
@@ -1526,7 +1535,8 @@
                     title: 'Year Percentage Change (%)',
                     showgrid: true,
                     gridcolor: 'rgba(0,0,0,0.1)',
-                    side: 'right'
+                    side: 'right',
+                    rangemode: currentChartType === 'bar' ? 'tozero' : 'normal'
                 };
             }
 
