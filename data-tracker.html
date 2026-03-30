@@ -845,7 +845,7 @@
                         marker: {
                             color: trace.line ? trace.line.color : trace.marker.color
                         },
-                        textposition: 'none'  // Remove labels on bars
+                        texttemplate: ''  // Prevent text from displaying on bars
                     });
                 });
             }
@@ -884,7 +884,7 @@
                         marker: {
                             color: trace.line ? trace.line.color : trace.marker.color
                         },
-                        textposition: 'none'  // Remove labels on bars
+                        texttemplate: ''  // Prevent text from displaying on bars
                     });
                 });
             }
@@ -1161,8 +1161,7 @@
 
                     if (currentChartType === 'bar') {
                         trace.marker = { color: customColors[index % customColors.length] };
-                        trace.textposition = 'none';  // Remove labels on bars
-                        delete trace.text;  // Remove text field that causes labels
+                        trace.texttemplate = '';  // Prevent text from displaying on bars but keep for hover
                         delete trace.connectgaps;  // Not applicable for bar charts
                         delete trace.mode;
                         delete trace.line;
