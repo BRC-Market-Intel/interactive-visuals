@@ -1156,12 +1156,13 @@
                         line: { color: customColors[index % customColors.length], width: 2 },
                         connectgaps: false,  // Don't connect gaps in data
                         yaxis: useYAxis,
-                        hovertemplate: mapping.dataset === 'csm' ? 'Date: %{text}<br>Value: %{y:.0f}' : 'Date: %{text}<br>Value: %{y:.1f}%',
-                        texttemplate: currentChartType === 'bar' ? '' : undefined  // Prevent labels on bars
+                        hovertemplate: mapping.dataset === 'csm' ? 'Date: %{text}<br>Value: %{y:.0f}' : 'Date: %{text}<br>Value: %{y:.1f}%'
                     };
 
                     if (currentChartType === 'bar') {
                         trace.marker = { color: customColors[index % customColors.length] };
+                        trace.textposition = 'none';  // Prevent text labels
+                        trace.texttemplate = '';  // Also set empty template
                         delete trace.connectgaps;  // Not applicable for bar charts
                         delete trace.mode;
                         delete trace.line;
