@@ -1162,6 +1162,7 @@
                     if (currentChartType === 'bar') {
                         trace.marker = { color: customColors[index % customColors.length] };
                         trace.textposition = 'none';  // Remove labels on bars
+                        delete trace.text;  // Remove text field that causes labels
                         delete trace.connectgaps;  // Not applicable for bar charts
                         delete trace.mode;
                         delete trace.line;
