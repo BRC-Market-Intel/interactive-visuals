@@ -840,13 +840,19 @@
             // Convert to bar chart if needed
             if (displayType === 'bar') {
                 data = data.map(function(trace) {
-                    return Object.assign({}, trace, {
+                    var barTrace = Object.assign({}, trace, {
                         type: 'bar',
                         marker: {
                             color: trace.line ? trace.line.color : trace.marker.color
-                        },
-                        texttemplate: ''  // Prevent text from displaying on bars
+                        }
                     });
+                    // Remove text field to prevent labels on bars
+                    delete barTrace.text;
+                    // Update hovertemplate to use x instead of text
+                    if (barTrace.hovertemplate && barTrace.hovertemplate.includes('%{text}')) {
+                        barTrace.hovertemplate = barTrace.hovertemplate.replace('%{text}', '%{x}');
+                    }
+                    return barTrace;
                 });
             }
 
@@ -879,13 +885,19 @@
             // Convert to bar chart if needed
             if (displayType === 'bar') {
                 data = data.map(function(trace) {
-                    return Object.assign({}, trace, {
+                    var barTrace = Object.assign({}, trace, {
                         type: 'bar',
                         marker: {
                             color: trace.line ? trace.line.color : trace.marker.color
-                        },
-                        texttemplate: ''  // Prevent text from displaying on bars
+                        }
                     });
+                    // Remove text field to prevent labels on bars
+                    delete barTrace.text;
+                    // Update hovertemplate to use x instead of text
+                    if (barTrace.hovertemplate && barTrace.hovertemplate.includes('%{text}')) {
+                        barTrace.hovertemplate = barTrace.hovertemplate.replace('%{text}', '%{x}');
+                    }
+                    return barTrace;
                 });
             }
 
@@ -1085,7 +1097,7 @@
             });
 
             // In annual view only: prevent mixing CSM with other series
-            if (currentFrequency === 'annual') {
+            if (currentFrequency === 'annual' && selectedSeries.length > 0) {
                 var hasCSM = selectedSeries.some(function(s) { return s.startsWith('csm-'); });
                 var hasOther = selectedSeries.some(function(s) { return !s.startsWith('csm-'); });
 
@@ -1098,8 +1110,17 @@
                         // If non-CSM is selected, disable CSM checkboxes
                         else if (hasOther && cb.value.startsWith('csm-')) {
                             cb.disabled = true;
+                        } else {
+                            cb.disabled = false;
                         }
+                    } else {
+                        cb.disabled = false;
                     }
+                });
+            } else if (selectedSeries.length === 0 || currentFrequency !== 'annual') {
+                // If nothing selected OR not in annual mode, enable everything
+                checkboxes.forEach(function(cb) {
+                    cb.disabled = false;
                 });
             }
 
@@ -1114,13 +1135,6 @@
                     if (!cb.checked) {
                         cb.disabled = true;
                     }
-                });
-            } else if (currentFrequency !== 'annual') {
-                // Only re-enable if not in annual mode (annual has its own rules above)
-                counter.classList.remove('max');
-                // Enable all boxes
-                checkboxes.forEach(function(cb) {
-                    cb.disabled = false;
                 });
             } else {
                 counter.classList.remove('max');
