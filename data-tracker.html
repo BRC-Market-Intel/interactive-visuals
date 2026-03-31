@@ -1461,14 +1461,21 @@
                 var filteredTrace = {
                     x: trace.x.slice(startIdx, endIdx + 1),
                     y: trace.y.slice(startIdx, endIdx + 1),
+                    text: trace.text ? trace.text.slice(startIdx, endIdx + 1) : undefined,  // Preserve text for hover
                     name: trace.name,
                     type: currentChartType === 'bar' ? 'bar' : 'scatter',
-                    mode: 'lines'
+                    mode: 'lines',
+                    hovertemplate: trace.hovertemplate  // Preserve hover template
                 };
 
                 if (currentChartType === 'bar') {
                     filteredTrace.marker = { color: trace.line ? trace.line.color : trace.marker.color };
                     delete filteredTrace.mode;
+                    delete filteredTrace.text;  // Remove text for bars to prevent labels
+                    // Update hovertemplate to use x instead of text for bars
+                    if (filteredTrace.hovertemplate && filteredTrace.hovertemplate.includes('%{text}')) {
+                        filteredTrace.hovertemplate = filteredTrace.hovertemplate.replace('%{text}', '%{x}');
+                    }
                 } else {
                     filteredTrace.line = trace.line;
                 }
