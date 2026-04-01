@@ -1470,7 +1470,8 @@
                     name: trace.name,
                     type: currentChartType === 'bar' ? 'bar' : 'scatter',
                     mode: 'lines',
-                    hovertemplate: trace.hovertemplate  // Preserve hover template
+                    hovertemplate: trace.hovertemplate,  // Preserve hover template
+                    visible: trace.visible  // Preserve visibility (for CSM legendonly traces)
                 };
 
                 if (currentChartType === 'bar') {
