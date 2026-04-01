@@ -1073,10 +1073,15 @@
             if (!chartsCreated[chartId]) {
                 createChart(chartId, chartType, currentFrequency, currentChartType);
             } else {
-                // Chart already exists, just reinitialize the date range for this tab
+                // Chart already exists, reinitialize the date range for this tab AND reset the visual
                 var dataset = chartData[chartType][currentFrequency];
                 if (dataset && dataset.data && dataset.data.length > 0 && dataset.data[0].x) {
                     initializeTopDateRange(dataset.data[0].x);
+                    // Reset the chart to show full date range
+                    var dates = dataset.data[0].x;
+                    if (dates && dates.length > 0) {
+                        updateStandardChartDateRange(dates[0], dates[dates.length - 1]);
+                    }
                 }
             }
 
