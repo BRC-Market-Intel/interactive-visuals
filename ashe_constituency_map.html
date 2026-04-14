@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+  
   :root {
     --brc-dark-blue:  #262262;
     --brc-light-blue: #00BBCE;
@@ -21,7 +21,7 @@
     --muted:          #6B6B8A;
     --font:           'Lato', sans-serif;
   }
-
+  
   body {
     background: var(--bg);
     font-family: var(--font);
@@ -30,7 +30,7 @@
     display: flex;
     flex-direction: column;
   }
-
+  
   header {
     background: var(--brc-dark-blue);
     color: #fff;
@@ -53,7 +53,7 @@
     border-left: 1px solid rgba(255,255,255,0.3);
     padding-left: 20px;
   }
-
+  
   .controls {
     background: var(--panel);
     border-bottom: 1px solid var(--border);
@@ -96,14 +96,14 @@
     cursor: not-allowed;
     background-color: var(--brc-pale-grey);
   }
-
+  
   #map { flex: 1; min-height: 76vh; }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>Retail Labour Force by Constituency</h1>
+  <h1>ASHE Data by Constituency</h1>
   <span>Annual Survey of Hours &amp; Earnings &nbsp;·&nbsp; ONS / Nomis &nbsp;·&nbsp; Westminster Constituencies</span>
 </header>
 
@@ -223,22 +223,22 @@ function buildKey(year, sex, pay, measure) {
 // ── Update map ─────────────────────────────────────────────
 function update() {
   syncDisabled();
-
+  
   const year    = selYear.value;
   const sex     = selSex.value;
   const pay     = selPay.value;
   const measure = selVar.value;
-
+  
   const key  = buildKey(year, sex, pay, measure);
   const vals = MAP_DATA[key] || {};
-
+  
   const zArr    = CODES.map(c => (vals[c] !== undefined ? vals[c] : null));
   const textArr = CODES.map(c => {
     const name = NAME_LUT[c] || c;
     const fmt  = formatValue(vals[c], pay, measure);
     return `<b>${name}</b><br>${measure}: ${fmt}`;
   });
-
+  
   Plotly.restyle("map", { z: [zArr], text: [textArr] }, [0]);
 }
 
