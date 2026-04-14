@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  
+
   :root {
     --brc-dark-blue:  #262262;
     --brc-light-blue: #00BBCE;
@@ -23,7 +23,7 @@
     --muted:          #6B6B8A;
     --font:           'Lato', sans-serif;
   }
-  
+
   body {
     background: var(--bg);
     font-family: var(--font);
@@ -32,7 +32,7 @@
     display: flex;
     flex-direction: column;
   }
-  
+
   header {
     background: var(--brc-dark-blue);
     color: #fff;
@@ -55,7 +55,7 @@
     border-left: 1px solid rgba(255,255,255,0.3);
     padding-left: 20px;
   }
-  
+
   .controls {
     background: var(--panel);
     border-bottom: 1px solid var(--border);
@@ -94,7 +94,7 @@
   #sel-industry { min-width: 440px; }
   select:focus               { outline: none; border-color: var(--brc-dark-blue); }
   select:hover:not(:disabled) { border-color: var(--brc-dark-blue); }
-  
+
   #suppression-notice {
     display: none;
     background: #FFFBEA;
@@ -103,7 +103,7 @@
     font-size: 0.8rem;
     color: var(--text);
   }
-  
+
   #map { flex: 1; min-height: 76vh; }
 </style>
 </head>
@@ -217,18 +217,18 @@ function update() {
   const metric = selMetric.value;
   const key    = `${year}||${status}||${ind}||${metric}`;
   const vals   = MAP_DATA[key] || {};
-  
+
   notice.style.display = GRANULAR_INDS.includes(ind) ? "block" : "none";
-  
+
   const zArr = CODES.map(c => (vals[c] !== undefined ? vals[c] : null));
   const zMax = calcZmax(zArr);
-  
+
   const textArr = CODES.map(c => {
     const name = NAME_LUT[c] || c;
     const fmt  = formatValue(vals[c], metric);
     return `<b>${name}</b><br>${metric}: ${fmt}`;
   });
-  
+
   Plotly.restyle("map", {
     z:    [zArr],
     text: [textArr],
