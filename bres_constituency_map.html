@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  
+
   :root {
     --brc-dark-blue:  #262262;
     --brc-light-blue: #00BBCE;
@@ -23,7 +23,7 @@
     --muted:          #6B6B8A;
     --font:           'Lato', sans-serif;
   }
-  
+
   body {
     background: var(--bg);
     font-family: var(--font);
@@ -32,7 +32,7 @@
     display: flex;
     flex-direction: column;
   }
-  
+
   header {
     background: var(--brc-dark-blue);
     color: #fff;
@@ -55,7 +55,7 @@
     border-left: 1px solid rgba(255,255,255,0.3);
     padding-left: 20px;
   }
-  
+
   .controls {
     background: var(--panel);
     border-bottom: 1px solid var(--border);
@@ -97,8 +97,7 @@
   #sel-industry { min-width: 440px; }
   select:focus               { outline: none; border-color: var(--brc-dark-blue); }
   select:hover:not(:disabled) { border-color: var(--brc-dark-blue); }
-  
-  /* ── Search box ── */
+
   .search-wrap { position: relative; }
   #search-input {
     border: 1.5px solid var(--border);
@@ -143,7 +142,7 @@
   }
   .search-result-item:hover { background: var(--brc-pale-grey); color: var(--brc-dark-blue); font-weight: 700; }
   .search-result-item.active { background: var(--brc-dark-blue); color: #fff; }
-  
+
   #suppression-notice {
     display: none;
     background: #FFFBEA;
@@ -152,7 +151,7 @@
     font-size: 0.8rem;
     color: var(--text);
   }
-  
+
   #map { flex: 1; min-height: 76vh; }
 </style>
 </head>
@@ -252,15 +251,17 @@ const trace = {
   },
 };
 
+// Initialise highlight trace with real coords at opacity 0
+// so the first restyle is always an update, never a cold start
 const highlightTrace = {
   type: "scattermapbox",
-  lat: [],
-  lon: [],
+  lat: [54.5, 54.5, 54.5],
+  lon: [-3.5, -3.5, -3.5],
   mode: "markers",
   marker: {
     size:    [44, 30, 18],
     color:   ["#00BBCE", "#00BBCE", "#00BBCE"],
-    opacity: [0.2, 0.45, 0.8],
+    opacity: [0, 0, 0],
   },
   hoverinfo: "none",
   showlegend: false,
@@ -294,18 +295,18 @@ function update() {
   const metric = selMetric.value;
   const key    = `${year}||${status}||${ind}||${metric}`;
   const vals   = MAP_DATA[key] || {};
-  
+
   notice.style.display = GRANULAR_INDS.includes(ind) ? "block" : "none";
-  
+
   const zArr = CODES.map(c => (vals[c] !== undefined ? vals[c] : null));
   const zMax = calcZmax(zArr);
-  
+
   const textArr = CODES.map(c => {
     const name = NAME_LUT[c] || c;
     const fmt  = formatValue(vals[c], metric);
     return `<b>${name}</b><br>${metric}: ${fmt}`;
   });
-  
+
   Plotly.restyle("map", {
     z:    [zArr],
     text: [textArr],
@@ -334,13 +335,10 @@ function showShine(lat, lon) {
 }
 
 function clearShine() {
-  Plotly.restyle("map", { lat: [[]], lon: [[]] }, [1]);
+  Plotly.restyle("map", {
+    "marker.opacity": [[0, 0, 0]],
+  }, [1]);
 }
-
-// Pre-warm highlight trace — fires invisibly on load so first search
-// is an update rather than a cold initialisation of the trace
-showShine(54.5, -3.5);
-setTimeout(clearShine, 50);
 
 // ── Constituency search ────────────────────────────────────
 const searchInput   = document.getElementById("search-input");
@@ -350,16 +348,16 @@ let activeIdx = -1;
 function showResults(query) {
   const q = query.trim().toLowerCase();
   if (!q) { searchResults.style.display = "none"; return; }
-  
+
   const matches = ALL_NAMES.filter(n => n.toLowerCase().includes(q)).slice(0, 10);
   if (!matches.length) { searchResults.style.display = "none"; return; }
-  
+
   searchResults.innerHTML = matches.map((n, i) =>
     `<div class="search-result-item" data-name="${n}" data-idx="${i}">${n}</div>`
   ).join("");
   searchResults.style.display = "block";
   activeIdx = -1;
-  
+
   searchResults.querySelectorAll(".search-result-item").forEach(el => {
     el.addEventListener("mousedown", e => {
       e.preventDefault();
@@ -371,17 +369,17 @@ function showResults(query) {
 function selectConstituency(name) {
   searchInput.value = name;
   searchResults.style.display = "none";
-  
+
   const code = NAME_TO_CODE[name];
   if (!code) return;
   const cen = CENTROIDS[code];
   if (!cen) return;
-  
+
   Plotly.relayout("map", {
     "mapbox.center": { lat: cen.lat, lon: cen.lon },
     "mapbox.zoom":   SHINE_ZOOM,
   });
-  
+
   const delay = hasSearched ? SHINE_DELAY_MS : SHINE_DELAY_FIRST;
   hasSearched = true;
   clearTimeout(shineTimeout);
@@ -395,7 +393,7 @@ searchInput.addEventListener("blur",  () => {
 searchInput.addEventListener("keydown", e => {
   const items = searchResults.querySelectorAll(".search-result-item");
   if (!items.length) return;
-  
+
   if (e.key === "ArrowDown") {
     e.preventDefault();
     activeIdx = Math.min(activeIdx + 1, items.length - 1);
@@ -410,7 +408,7 @@ searchInput.addEventListener("keydown", e => {
     searchResults.style.display = "none";
     return;
   }
-  
+
   items.forEach((el, i) => el.classList.toggle("active", i === activeIdx));
   if (activeIdx >= 0) items[activeIdx].scrollIntoView({ block: "nearest" });
 });
