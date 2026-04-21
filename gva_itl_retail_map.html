@@ -31,17 +31,17 @@ header p  { font-size: 11px; color: #E6E7E8; margin-top: 2px; }
 }
 .ctrl-group { display: flex; flex-direction: column; gap: 4px; }
 .ctrl-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: #888; }
-/* Styled dropdowns for Geography Type and Metric */
+/* Styled dropdowns for Geography Type and Metric — matches BRES style */
 .brc-sel {
-  border: 1.5px solid #262262; border-radius: 4px; padding: 6px 28px 6px 10px;
-  font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700;
-  color: #262262; background: #fff; outline: none; cursor: pointer;
   appearance: none; -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23262262'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: right 8px center;
-  min-width: 160px; transition: border-color .15s;
+  background: #F4F4F6 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%23262262'/%3E%3C/svg%3E") no-repeat right 12px center;
+  border: 1.5px solid #D6D6DE; border-radius: 3px;
+  padding: 8px 36px 8px 12px;
+  font-family: 'Lato', sans-serif; font-size: 0.875rem; font-weight: 400;
+  color: #1A1A3A; cursor: pointer; min-width: 180px;
+  transition: border-color 0.15s; outline: none;
 }
-.brc-sel:focus { border-color: #00BBCE; }
+.brc-sel:focus, .brc-sel:hover { border-color: #262262; }
 .toggle-pair { display: flex; }
 .tog {
   border: 1.5px solid #262262; background: #fff; color: #262262;
@@ -51,15 +51,20 @@ header p  { font-size: 11px; color: #E6E7E8; margin-top: 2px; }
 .tog:first-child { border-radius: 4px 0 0 4px; }
 .tog:last-child  { border-radius: 0 4px 4px 0; border-left: none; }
 .tog.active      { background: #262262; color: #fff; }
-/* Export button */
+/* Export button — BRC green, BRES style */
 .export-btn {
-  border: 1.5px solid #00BBCE; background: #fff; color: #00BBCE;
-  font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700;
-  padding: 6px 14px; cursor: pointer; border-radius: 4px;
-  white-space: nowrap; transition: background .15s, color .15s;
-  display: flex; align-items: center; gap: 5px;
+  align-self: flex-end;
+  padding: 8px 18px;
+  background: #8CC747; color: #fff;
+  border: none; border-radius: 3px;
+  font-family: 'Lato', sans-serif; font-size: 0.875rem; font-weight: 700;
+  cursor: pointer; letter-spacing: 0.03em;
+  transition: opacity 0.15s; white-space: nowrap;
+  display: flex; align-items: center; gap: 6px;
 }
-.export-btn:hover { background: #00BBCE; color: #fff; }
+.export-btn:hover { opacity: 0.88; }
+/* Purple label for Metric */
+.ctrl-label.purple { color: #92278F; }
 .search-wrap { position: relative; }
 #search-input {
   border: 1.5px solid #E6E7E8; border-radius: 4px; padding: 6px 10px;
@@ -144,7 +149,7 @@ footer {
   </div>
 
   <div class="ctrl-group">
-    <div class="ctrl-label">Metric</div>
+    <div class="ctrl-label purple">Metric</div>
     <select class="brc-sel" id="metric-sel" onchange="setMetric()">
       <option value="value" selected>£ Value</option>
       <option value="pct_output">% of Local Output</option>
@@ -168,7 +173,7 @@ footer {
       <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M6.5 1v7M3.5 5.5L6.5 8.5 9.5 5.5M2 10h9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      Export Excel
+      Export
     </button>
   </div>
 
