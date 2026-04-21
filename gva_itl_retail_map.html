@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Retail GVA (SIC 47) by Geography | BRC</title>
+<title>Retail Economic Output by Area | BRC</title>
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -30,14 +31,17 @@ header p  { font-size: 11px; color: #E6E7E8; margin-top: 2px; }
 }
 .ctrl-group { display: flex; flex-direction: column; gap: 4px; }
 .ctrl-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: #888; }
-.cycle-btns { display: flex; flex-wrap: wrap; gap: 5px; }
-.cbtn {
-  border: 1.5px solid #262262; background: #fff; color: #262262;
+/* Styled dropdowns for Geography Type and Metric */
+.brc-sel {
+  border: 1.5px solid #262262; border-radius: 4px; padding: 6px 28px 6px 10px;
   font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700;
-  padding: 6px 12px; cursor: pointer; border-radius: 4px;
-  white-space: nowrap; transition: background .15s, color .15s;
+  color: #262262; background: #fff; outline: none; cursor: pointer;
+  appearance: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23262262'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 8px center;
+  min-width: 160px; transition: border-color .15s;
 }
-.cbtn.active { background: #262262; color: #fff; }
+.brc-sel:focus { border-color: #00BBCE; }
 .toggle-pair { display: flex; }
 .tog {
   border: 1.5px solid #262262; background: #fff; color: #262262;
@@ -47,6 +51,15 @@ header p  { font-size: 11px; color: #E6E7E8; margin-top: 2px; }
 .tog:first-child { border-radius: 4px 0 0 4px; }
 .tog:last-child  { border-radius: 0 4px 4px 0; border-left: none; }
 .tog.active      { background: #262262; color: #fff; }
+/* Export button */
+.export-btn {
+  border: 1.5px solid #00BBCE; background: #fff; color: #00BBCE;
+  font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700;
+  padding: 6px 14px; cursor: pointer; border-radius: 4px;
+  white-space: nowrap; transition: background .15s, color .15s;
+  display: flex; align-items: center; gap: 5px;
+}
+.export-btn:hover { background: #00BBCE; color: #fff; }
 .search-wrap { position: relative; }
 #search-input {
   border: 1.5px solid #E6E7E8; border-radius: 4px; padding: 6px 10px;
@@ -100,7 +113,7 @@ footer {
 <header>
   <div class="brc-bar"></div>
   <div>
-    <h1>Retail GVA (SIC 47) by Geography</h1>
+    <h1>Retail Economic Output by Area</h1>
     <p>ONS Regional GVA (Balanced) by Industry &nbsp;&bull;&nbsp; ITL1 / ITL2 / ITL3 &nbsp;&bull;&nbsp; 1998–2023</p>
   </div>
 </header>
@@ -109,11 +122,11 @@ footer {
 
   <div class="ctrl-group">
     <div class="ctrl-label">Geography Type</div>
-    <div class="cycle-btns">
-      <button class="cbtn" data-geo="itl1" onclick="setGeo(this)">ITL 1 &nbsp;<span style="font-weight:400;opacity:.7">(Nations &amp; Regions)</span></button>
-      <button class="cbtn" data-geo="itl2" onclick="setGeo(this)">ITL 2 &nbsp;<span style="font-weight:400;opacity:.7">(Sub-regions)</span></button>
-      <button class="cbtn active" data-geo="itl3" onclick="setGeo(this)">ITL 3 &nbsp;<span style="font-weight:400;opacity:.7">(Local Areas)</span></button>
-    </div>
+    <select class="brc-sel" id="geo-sel" onchange="setGeo()">
+      <option value="itl1">ITL 1 — Nations &amp; Regions</option>
+      <option value="itl2">ITL 2 — Sub-regions</option>
+      <option value="itl3" selected>ITL 3 — Local Areas</option>
+    </select>
   </div>
 
   <div class="ctrl-group search-wrap">
@@ -132,12 +145,12 @@ footer {
 
   <div class="ctrl-group">
     <div class="ctrl-label">Metric</div>
-    <div class="cycle-btns">
-      <button class="cbtn active" data-metric="value"         onclick="setMetric(this)">£ Value</button>
-      <button class="cbtn"        data-metric="pct_output"    onclick="setMetric(this)">% of Local Output</button>
-      <button class="cbtn"        data-metric="annual_change" onclick="setMetric(this)">Annual % Change</button>
-      <button class="cbtn"        data-metric="change_since"  onclick="setMetric(this)">% Change Since</button>
-    </div>
+    <select class="brc-sel" id="metric-sel" onchange="setMetric()">
+      <option value="value" selected>£ Value</option>
+      <option value="pct_output">% of Local Output</option>
+      <option value="annual_change">Annual % Change</option>
+      <option value="change_since">% Change Since</option>
+    </select>
   </div>
 
   <div class="ctrl-group">
@@ -148,6 +161,15 @@ footer {
   <div class="ctrl-group since-group" id="since-group">
     <div class="ctrl-label">Since</div>
     <select class="yr-sel" id="since-sel" onchange="render()"></select>
+  </div>
+
+  <div class="ctrl-group" style="justify-content:flex-end">
+    <button class="export-btn" onclick="exportExcel()">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6.5 1v7M3.5 5.5L6.5 8.5 9.5 5.5M2 10h9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Export Excel
+    </button>
   </div>
 
 </div>
@@ -202,13 +224,13 @@ function populateYears() {
   YEARS.slice(0,-1).forEach(y => { const o=new Option(y,y); if(y===1998) o.selected=true; sSel.add(o); });
 }
 
-function setGeo(btn) {
-  S.geo = btn.dataset.geo; S.selected = null;
+function setGeo() {
+  S.geo = document.getElementById('geo-sel').value;
+  S.selected = null;
   document.getElementById('search-input').value = '';
   document.getElementById('search-dropdown').style.display = 'none';
   document.getElementById('side-panel').classList.remove('open');
   document.getElementById('search-label').textContent = GEO_LABELS[S.geo];
-  document.querySelectorAll('[data-geo]').forEach(b => b.classList.toggle('active', b.dataset.geo===S.geo));
   clearShine(); render();
 }
 
@@ -219,9 +241,8 @@ function setAdjusted(v) {
   render();
 }
 
-function setMetric(btn) {
-  S.metric = btn.dataset.metric;
-  document.querySelectorAll('[data-metric]').forEach(b => b.classList.toggle('active', b.dataset.metric===S.metric));
+function setMetric() {
+  S.metric = document.getElementById('metric-sel').value;
   const ySel = document.getElementById('year-sel');
   Array.from(ySel.options).forEach(o => { o.disabled = S.metric==='annual_change' && parseInt(o.value)<1999; });
   if (S.metric==='annual_change' && parseInt(ySel.value)<1999) ySel.value = '1999';
@@ -292,6 +313,11 @@ function render() {
   const validZ = zVals.filter(v => v!=null);
   let zmin = validZ.length ? Math.min(...validZ) : 0;
   let zmax = validZ.length ? Math.max(...validZ) : 1;
+  // For £ Value: cap at 95th percentile to prevent London/City of London dominating
+  if (S.metric==='value' && validZ.length) {
+    const sorted=[...validZ].sort((a,b)=>a-b);
+    zmax = sorted[Math.floor(sorted.length*0.95)];
+  }
   if (S.metric==='annual_change'||S.metric==='change_since') { const e=Math.max(Math.abs(zmin),Math.abs(zmax)); zmin=-e; zmax=e; }
 
   const hoverTexts = codes.map(c => `<b>${gva()[c]?.name??c}</b><br>${fmt(calcValue(c,S.year))}`);
@@ -465,6 +491,85 @@ function updatePanel() {
   document.getElementById('panel-note').textContent = S.adjusted
     ? 'Inflation-adjusted: chained volume measures (CVM), 2022 base year.'
     : 'Current prices: nominal £ values, not adjusted for inflation.';
+}
+
+/* ── Excel export ──────────────────────────────────────────────────────────── */
+function metricLabel() {
+  return {
+    value:         S.adjusted ? 'Retail GVA — CVM 2022 prices (£m)' : 'Retail GVA — Current prices (£m)',
+    pct_output:    '% of Local Total GVA',
+    annual_change: `Annual % Change`,
+    change_since:  `% Change vs ${S.since}`,
+  }[S.metric];
+}
+
+function exportExcel() {
+  const geoLabel = GEO_LABELS[S.geo];
+  const adjLabel = S.adjusted ? 'Inflation-Adjusted (CVM 2022)' : 'Current Prices';
+  const mLabel   = metricLabel();
+
+  let rows, sheetName, filename;
+
+  if (S.selected) {
+    // Time-series for selected area
+    const code = S.selected;
+    const name = gva()[code]?.name ?? code;
+    const tsYears = S.metric==='annual_change' ? YEARS.slice(1) : YEARS;
+    rows = tsYears.map(y => {
+      const v = calcValue(code, String(y));
+      return {
+        'Geography Type': geoLabel,
+        'ITL Code':       code,
+        'Area':           name,
+        'Metric':         mLabel,
+        'Adjustment':     adjLabel,
+        'Year':           y,
+        'Value':          v,
+        'Formatted':      fmt(v),
+      };
+    });
+    sheetName = name.substring(0, 31);
+    filename  = `RetailGVA_${name.replace(/[^a-zA-Z0-9]/g,'_')}_${S.metric}_${adjLabel.replace(/ /g,'_')}.xlsx`;
+  } else {
+    // All areas, selected year
+    rows = Object.entries(gva()).map(([code, d]) => {
+      const v = calcValue(code, S.year);
+      return {
+        'Geography Type': geoLabel,
+        'ITL Code':       code,
+        'Area':           d.name,
+        'Metric':         mLabel,
+        'Adjustment':     adjLabel,
+        'Year':           parseInt(S.year),
+        'Value':          v,
+        'Formatted':      fmt(v),
+      };
+    }).sort((a,b) => a['Area'].localeCompare(b['Area']));
+    sheetName = `${S.year}`;
+    filename  = `RetailGVA_${geoLabel.replace(/ /g,'_')}_${S.metric}_${S.year}_${adjLabel.replace(/ /g,'_')}.xlsx`;
+  }
+
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [
+    {wch:20},{wch:12},{wch:35},{wch:36},{wch:28},{wch:6},{wch:12},{wch:14}
+  ];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, sheetName.substring(0,31));
+
+  // Add a metadata sheet
+  const meta = XLSX.utils.aoa_to_sheet([
+    ['Retail Economic Output by Area'],
+    ['Source:', 'ONS Regional GVA (Balanced) by Industry'],
+    ['Geography:', geoLabel],
+    ['Metric:', mLabel],
+    ['Adjustment:', adjLabel],
+    S.selected ? ['Area:', gva()[S.selected]?.name] : ['Year:', S.year],
+    ['Exported:', new Date().toLocaleDateString('en-GB')],
+    ['Notes:', 'Values in £ millions. CVM = Chained Volume Measures, base year 2022.'],
+  ]);
+  XLSX.utils.book_append_sheet(wb, meta, 'Metadata');
+
+  XLSX.writeFile(wb, filename);
 }
 
 populateYears();
