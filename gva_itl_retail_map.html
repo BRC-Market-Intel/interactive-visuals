@@ -134,7 +134,7 @@ footer {
 </header>
 
 <div class="controls">
-
+  
   <div class="ctrl-group">
     <div class="ctrl-label">Geography Type</div>
     <select class="brc-sel" id="geo-sel" onchange="setGeo()">
@@ -143,13 +143,13 @@ footer {
       <option value="itl3" selected>ITL 3 — Local Areas</option>
     </select>
   </div>
-
+  
   <div class="ctrl-group search-wrap">
     <div class="ctrl-label" id="search-label">Local Area</div>
     <input id="search-input" type="text" placeholder="Search area…" autocomplete="off">
     <div id="search-dropdown"></div>
   </div>
-
+  
   <div class="ctrl-group">
     <div class="ctrl-label">Inflation-Adjusted</div>
     <div class="toggle-pair">
@@ -157,7 +157,7 @@ footer {
       <button class="tog"        id="tog-no"  onclick="setAdjusted(false)">No</button>
     </div>
   </div>
-
+  
   <div class="ctrl-group">
     <div class="ctrl-label purple">Metric</div>
     <select class="brc-sel" id="metric-sel" onchange="setMetric()">
@@ -167,17 +167,17 @@ footer {
       <option value="change_since">% Change Since</option>
     </select>
   </div>
-
+  
   <div class="ctrl-group">
     <div class="ctrl-label">Year</div>
     <select class="yr-sel" id="year-sel" onchange="onYearChange()"></select>
   </div>
-
+  
   <div class="ctrl-group since-group" id="since-group">
     <div class="ctrl-label">Since</div>
     <select class="yr-sel" id="since-sel" onchange="render()"></select>
   </div>
-
+  
   <div class="ctrl-group" style="justify-content:flex-end">
     <button class="export-btn" onclick="exportExcel()">
       <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -324,7 +324,7 @@ let mapInitialised = false;
 function render() {
   S.year  = document.getElementById('year-sel').value;
   S.since = document.getElementById('since-sel').value;
-
+  
   const currentGeo = geo();
   const codes = currentGeo.features.map(f => f.id);
   const zVals = codes.map(c => calcValue(c, S.year));
@@ -337,9 +337,9 @@ function render() {
     zmax = sorted[Math.floor(sorted.length*0.95)];
   }
   if (S.metric==='annual_change'||S.metric==='change_since') { const e=Math.max(Math.abs(zmin),Math.abs(zmax)); zmin=-e; zmax=e; }
-
+  
   const hoverTexts = codes.map(c => `<b>${gva()[c]?.name??c}</b><br>${fmt(calcValue(c,S.year))}`);
-
+  
   const metricLabel = {
     value:         S.adjusted ? 'Retail GVA — CVM (2022 prices, £m)' : 'Retail GVA — Current prices (£m)',
     pct_output:    '% of Local Total GVA',
@@ -347,7 +347,7 @@ function render() {
     change_since:  `% Change vs ${S.since}`,
   }[S.metric];
   document.getElementById('footer-metric').textContent = metricLabel;
-
+  
   const choropleth = {
     type: 'choroplethmapbox',
     geojson: currentGeo, locations: codes, z: zVals,
@@ -363,14 +363,14 @@ function render() {
       tickformat: S.metric==='value' ? ',.0f' : '.1f',
     },
   };
-
+  
   const shineDots = {
     type: 'scattermapbox',
     lat:[54.5,54.5,54.5], lon:[-3.0,-3.0,-3.0], mode:'markers',
     marker:{ size:[44,30,18], color:[C.teal,C.teal,C.teal], opacity:[0,0,0] },
     hoverinfo:'none', showlegend:false,
   };
-
+  
   const layout = {
     mapbox: { style:'carto-positron', center:{lat:54.2,lon:-2.5}, zoom:4.8 },
     hovermode: 'closest',
@@ -384,9 +384,9 @@ function render() {
       bgcolor:'rgba(255,255,255,.88)', borderpad:6, bordercolor:C.grey, borderwidth:1, xanchor:'center',
     }],
   };
-
+  
   const cfg = { responsive:true, displayModeBar:false };
-
+  
   if (!mapInitialised) {
     Plotly.newPlot('map-div', [choropleth, shineDots], layout, cfg);
     document.getElementById('map-div').on('plotly_click', d => {
@@ -396,7 +396,7 @@ function render() {
   } else {
     Plotly.react('map-div', [choropleth, shineDots], layout, cfg);
   }
-
+  
   updatePanel();
 }
 
@@ -469,7 +469,7 @@ function updatePanel() {
   const showPanel=S.selected && (S.metric==='value'||S.metric==='pct_output'||S.metric==='annual_change');
   if (!showPanel) { panel.classList.remove('open'); return; }
   panel.classList.add('open');
-
+  
   const code=S.selected, d=gva()[code], name=d?.name??code;
   document.getElementById('panel-name').textContent=name;
   document.getElementById('panel-sub').textContent={
@@ -477,18 +477,18 @@ function updatePanel() {
     pct_output:    'Retail GVA as % of total local GVA',
     annual_change: 'Year-on-year % change in retail GVA',
   }[S.metric];
-
+  
   const v=calcValue(code,S.year), v2022=calcValue(code,'2022');
   document.getElementById('stat-cards').innerHTML=`
     <div class="stat-card"><div class="stat-val">${fmt(v)}</div><div class="stat-lbl">${S.year}</div></div>
     <div class="stat-card"><div class="stat-val">${fmt(v2022)}</div><div class="stat-lbl">2022</div></div>`;
-
+  
   const tsYears=S.metric==='annual_change'?YEARS.slice(1):YEARS;
   const tsVals=tsYears.map(y=>calcValue(code,String(y)));
   const isChange=S.metric==='annual_change';
   const lineCol=isChange?C.teal:C.navy, fillCol=isChange?C.teal+'33':C.navy+'22';
   const selIdx=tsYears.indexOf(parseInt(S.year));
-
+  
   document.getElementById('ts-chart-wrap').style.display = 'block';
   document.getElementById('chart-toggle-btn').textContent = 'Hide Visual';
   document.getElementById('chart-toggle-btn').classList.add('visible');
@@ -504,7 +504,7 @@ function updatePanel() {
       hovertemplate:`<b>${S.year}</b>: ${fmt(tsVals[selIdx])}<extra></extra>`, showlegend:false,
     });
   }
-
+  
   Plotly.react('ts-chart', traces, {
     height:240, margin:{l:46,r:10,t:10,b:30},
     paper_bgcolor:'#fff', plot_bgcolor:'#fff',
@@ -519,7 +519,7 @@ function updatePanel() {
     showlegend:false,
     shapes:isChange?[{type:'line',x0:tsYears[0],x1:tsYears[tsYears.length-1],y0:0,y1:0,line:{color:'#ddd',width:1,dash:'dot'}}]:[],
   }, {displayModeBar:false, responsive:true});
-
+  
   document.getElementById('panel-note').textContent = S.adjusted
     ? 'Inflation-adjusted: chained volume measures (CVM), 2022 base year.'
     : 'Current prices: nominal £ values, not adjusted for inflation.';
@@ -539,9 +539,9 @@ function exportExcel() {
   const geoLabel = GEO_LABELS[S.geo];
   const adjLabel = S.adjusted ? 'Inflation-Adjusted (CVM 2022)' : 'Current Prices';
   const mLabel   = metricLabel();
-
+  
   let rows, sheetName, filename;
-
+  
   if (S.selected) {
     // Time-series for selected area
     const code = S.selected;
@@ -580,14 +580,14 @@ function exportExcel() {
     sheetName = `${S.year}`;
     filename  = `RetailGVA_${geoLabel.replace(/ /g,'_')}_${S.metric}_${S.year}_${adjLabel.replace(/ /g,'_')}.xlsx`;
   }
-
+  
   const ws = XLSX.utils.json_to_sheet(rows);
   ws['!cols'] = [
     {wch:20},{wch:12},{wch:35},{wch:36},{wch:28},{wch:6},{wch:12},{wch:14}
   ];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, sheetName.substring(0,31));
-
+  
   // Add a metadata sheet
   const meta = XLSX.utils.aoa_to_sheet([
     ['Retail Economic Output by Area'],
@@ -600,7 +600,7 @@ function exportExcel() {
     ['Notes:', 'Values in £ millions. CVM = Chained Volume Measures, base year 2022.'],
   ]);
   XLSX.utils.book_append_sheet(wb, meta, 'Metadata');
-
+  
   XLSX.writeFile(wb, filename);
 }
 
