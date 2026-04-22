@@ -107,10 +107,16 @@ header p  { font-size: 11px; color: #E6E7E8; margin-top: 2px; }
 .stat-val { font-size: 19px; font-weight: 900; color: #262262; }
 .stat-lbl { font-size: 10px; color: #777; margin-top: 2px; }
 .panel-note { font-size: 10px; color: #aaa; margin-top: 10px; line-height: 1.5; }
-.chart-hdr { display:flex; justify-content:space-between; align-items:center; margin:10px 0 4px; }
-.chart-ttl { font-size:10px; font-weight:700; color:#aaa; text-transform:uppercase; letter-spacing:.5px; }
-.chart-x   { background:none; border:none; cursor:pointer; color:#ccc; font-size:15px; line-height:1; padding:0; }
-.chart-x:hover { color:#555; }
+.chart-toggle-btn {
+  display: none; width: 100%; margin-bottom: 10px;
+  padding: 6px 12px; background: #fff;
+  border: 1.5px solid #E6E7E8; border-radius: 4px;
+  font-family: 'Lato', sans-serif; font-size: 11px; font-weight: 700;
+  color: #888; cursor: pointer; text-align: center;
+  transition: border-color .15s, color .15s;
+}
+.chart-toggle-btn:hover { border-color: #262262; color: #262262; }
+.chart-toggle-btn.visible { display: block; }
 footer {
   background: #262262; color: #E6E7E8; font-size: 10px;
   padding: 5px 20px; flex-shrink: 0; display: flex; justify-content: space-between;
@@ -194,12 +200,9 @@ footer {
         </div>
         <button class="close-btn" onclick="closePanel()">&#x2715;</button>
       </div>
+      <button class="chart-toggle-btn" id="chart-toggle-btn" onclick="toggleChart()">Hide Visual</button>
       <div class="stat-cards" id="stat-cards"></div>
       <div id="ts-chart-wrap">
-        <div class="chart-hdr">
-          <span class="chart-ttl">Time series</span>
-          <button class="chart-x" title="Hide chart" onclick="hideChart()">&#x2715;</button>
-        </div>
         <div id="ts-chart"></div>
       </div>
       <div class="panel-note" id="panel-note"></div>
@@ -449,11 +452,16 @@ function selectArea(code) {
 function closePanel() {
   S.selected=null; searchInput.value='';
   document.getElementById('side-panel').classList.remove('open');
+  document.getElementById('chart-toggle-btn').classList.remove('visible');
   clearShine();
 }
 
-function hideChart() {
-  document.getElementById('ts-chart-wrap').style.display = 'none';
+function toggleChart() {
+  const wrap = document.getElementById('ts-chart-wrap');
+  const btn  = document.getElementById('chart-toggle-btn');
+  const hidden = wrap.style.display === 'none';
+  wrap.style.display = hidden ? 'block' : 'none';
+  btn.textContent = hidden ? 'Hide Visual' : 'Show Visual';
 }
 
 function updatePanel() {
@@ -482,6 +490,8 @@ function updatePanel() {
   const selIdx=tsYears.indexOf(parseInt(S.year));
 
   document.getElementById('ts-chart-wrap').style.display = 'block';
+  document.getElementById('chart-toggle-btn').textContent = 'Hide Visual';
+  document.getElementById('chart-toggle-btn').classList.add('visible');
   const traces=[{
     x:tsYears, y:tsVals, type:'scatter', mode:'lines',
     line:{color:lineCol,width:2}, fill:'tozeroy', fillcolor:fillCol,
