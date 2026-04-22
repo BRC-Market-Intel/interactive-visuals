@@ -162,10 +162,16 @@
   .stat-val { font-size: 18px; font-weight: 900; color: var(--navy); }
   .stat-lbl { font-size: 10px; color: #777; margin-top: 2px; }
   .panel-note { font-size: 10px; color: #aaa; margin-top: 10px; line-height: 1.5; }
-  .chart-hdr { display:flex; justify-content:space-between; align-items:center; margin:10px 0 4px; }
-  .chart-ttl { font-size:10px; font-weight:700; color:#aaa; text-transform:uppercase; letter-spacing:.5px; }
-  .chart-x   { background:none; border:none; cursor:pointer; color:#ccc; font-size:15px; line-height:1; padding:0; }
-  .chart-x:hover { color:#555; }
+  .chart-toggle-btn {
+    display: none; width: 100%; margin-bottom: 10px;
+    padding: 6px 12px; background: #fff;
+    border: 1.5px solid var(--grey); border-radius: 4px;
+    font-family: var(--font); font-size: 11px; font-weight: 700;
+    color: #888; cursor: pointer; text-align: center;
+    transition: border-color .15s, color .15s;
+  }
+  .chart-toggle-btn:hover { border-color: var(--navy); color: var(--navy); }
+  .chart-toggle-btn.visible { display: block; }
 </style>
 </head>
 <body>
@@ -235,12 +241,9 @@
         </div>
         <button class="close-btn" onclick="closePanel()">&#x2715;</button>
       </div>
+      <button class="chart-toggle-btn" id="chart-toggle-btn" onclick="toggleChart()">Hide Visual</button>
       <div class="stat-cards" id="stat-cards"></div>
       <div id="ts-chart-wrap">
-        <div class="chart-hdr">
-          <span class="chart-ttl">Time series</span>
-          <button class="chart-x" title="Hide chart" onclick="hideChart()">&#x2715;</button>
-        </div>
         <div id="ts-chart"></div>
       </div>
       <div class="panel-note" id="panel-note"></div>
@@ -416,6 +419,8 @@ function updatePanel() {
   const isShare    = S.metric === "Share of all local jobs";
 
   document.getElementById("ts-chart-wrap").style.display = "block";
+  document.getElementById("chart-toggle-btn").textContent = "Hide Visual";
+  document.getElementById("chart-toggle-btn").classList.add("visible");
   Plotly.react("ts-chart", [{
     x: TS_YEARS, y: barVals,
     type: "bar",
@@ -446,12 +451,17 @@ function updatePanel() {
 function closePanel() {
   S.selected = null;
   document.getElementById("side-panel").classList.remove("open");
+  document.getElementById("chart-toggle-btn").classList.remove("visible");
   document.getElementById("search-input").value = "";
   clearShine();
 }
 
-function hideChart() {
-  document.getElementById("ts-chart-wrap").style.display = "none";
+function toggleChart() {
+  const wrap = document.getElementById("ts-chart-wrap");
+  const btn  = document.getElementById("chart-toggle-btn");
+  const hidden = wrap.style.display === "none";
+  wrap.style.display = hidden ? "block" : "none";
+  btn.textContent = hidden ? "Hide Visual" : "Show Visual";
 }
 
 // ── Shine ──────────────────────────────────────────────────
