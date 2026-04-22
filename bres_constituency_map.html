@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  
+
   :root {
     --navy:   #262262;
     --teal:   #00BBCE;
@@ -26,12 +26,12 @@
     --muted:  #6B6B8A;
     --font:   'Lato', sans-serif;
   }
-  
+
   body {
     background: var(--bg); font-family: var(--font); color: var(--text);
     height: 100vh; display: flex; flex-direction: column; overflow: hidden;
   }
-  
+
   /* ── Header ── */
   header {
     background: var(--navy); color: #fff; padding: 12px 24px; flex-shrink: 0;
@@ -44,7 +44,7 @@
   }
   header h1 { font-size: 17px; font-weight: 900; letter-spacing: .3px; }
   header p  { font-size: 11px; color: var(--grey); margin-top: 2px; }
-  
+
   /* ── Controls ── */
   .controls {
     background: #fff; border-bottom: 3px solid var(--grey);
@@ -57,7 +57,7 @@
     letter-spacing: .6px; color: #888;
   }
   .ctrl-label.purple { color: var(--purple); }
-  
+
   .brc-sel {
     appearance: none; -webkit-appearance: none;
     background: #F4F4F6 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%23262262'/%3E%3C/svg%3E") no-repeat right 12px center;
@@ -69,7 +69,7 @@
   }
   .brc-sel:focus, .brc-sel:hover { border-color: var(--navy); }
   #sel-industry { min-width: 440px; }
-  
+
   /* Search */
   .search-wrap { position: relative; }
   #search-input {
@@ -87,7 +87,7 @@
   }
   .dd-item { padding: 7px 10px; font-size: 13px; cursor: pointer; }
   .dd-item:hover, .dd-item.active { background: var(--grey); }
-  
+
   /* ── Employment Slider ── */
   #emp-slider {
     -webkit-appearance: none; appearance: none;
@@ -111,7 +111,7 @@
     text-transform: uppercase; letter-spacing: .4px; color: var(--muted);
     margin-top: 3px;
   }
-  
+
   /* Export */
   .export-btn {
     align-self: flex-end; padding: 8px 18px;
@@ -123,55 +123,39 @@
     display: flex; align-items: center; gap: 6px;
   }
   .export-btn:hover { opacity: 0.88; }
-  
+
   /* Suppression notice */
   #suppression-notice {
     display: none; background: #FFFBEA;
     border-left: 4px solid var(--yellow);
     padding: 7px 20px; font-size: 0.78rem; color: var(--text); flex-shrink: 0;
   }
-  
+
   /* ── Main layout ── */
   .main { flex: 1; display: flex; overflow: hidden; min-height: 0; }
   #map-div { flex: 1; min-width: 0; }
-  
-  /* ── Side panel ── */
-  #side-panel {
-    width: 0; background: #fff; border-left: 3px solid var(--grey);
-    overflow: hidden; transition: width .25s ease; flex-shrink: 0;
-    display: flex; flex-direction: column;
+
+  /* ── Chart view ── */
+  #chart-view {
+    display: none; flex: 1; flex-direction: column;
+    background: #fff; min-height: 0;
   }
-  #side-panel.open { width: 340px; }
-  .panel-inner { width: 340px; padding: 18px 18px 12px; overflow-y: auto; flex: 1; }
-  .panel-header {
-    display: flex; justify-content: space-between;
-    align-items: flex-start; margin-bottom: 12px;
+  #chart-view.active { display: flex; }
+  .chart-view-hdr {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 24px; border-bottom: 2px solid var(--grey);
+    flex-shrink: 0; background: #fff;
   }
-  .panel-title { font-size: 15px; font-weight: 900; color: var(--navy); line-height: 1.3; }
-  .panel-sub   { font-size: 11px; color: #888; margin-top: 3px; }
-  .close-btn {
-    background: none; border: none; cursor: pointer; color: #aaa;
-    font-size: 18px; line-height: 1; padding: 0 0 0 8px; flex-shrink: 0;
+  .chart-view-name { font-size: 16px; font-weight: 900; color: var(--navy); }
+  .chart-view-sub  { font-size: 11px; color: #888; margin-top: 3px; }
+  .back-btn {
+    padding: 7px 16px; background: var(--navy); color: #fff;
+    border: none; border-radius: 4px;
+    font-family: var(--font); font-size: 12px; font-weight: 700;
+    cursor: pointer; letter-spacing: .3px; transition: opacity .15s;
   }
-  .close-btn:hover { color: #555; }
-  .stat-cards { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
-  .stat-card {
-    background: var(--grey); border-radius: 6px;
-    padding: 10px 12px; flex: 1; min-width: 120px;
-  }
-  .stat-val { font-size: 18px; font-weight: 900; color: var(--navy); }
-  .stat-lbl { font-size: 10px; color: #777; margin-top: 2px; }
-  .panel-note { font-size: 10px; color: #aaa; margin-top: 10px; line-height: 1.5; }
-  .chart-toggle-btn {
-    display: none; width: 100%; margin-bottom: 10px;
-    padding: 6px 12px; background: #fff;
-    border: 1.5px solid var(--grey); border-radius: 4px;
-    font-family: var(--font); font-size: 11px; font-weight: 700;
-    color: #888; cursor: pointer; text-align: center;
-    transition: border-color .15s, color .15s;
-  }
-  .chart-toggle-btn:hover { border-color: var(--navy); color: var(--navy); }
-  .chart-toggle-btn.visible { display: block; }
+  .back-btn:hover { opacity: 0.85; }
+  #full-ts-chart { flex: 1; min-height: 0; }
 </style>
 </head>
 <body>
@@ -185,18 +169,18 @@
 </header>
 
 <div class="controls">
-  
-  <div class="ctrl-group search-wrap">
+
+  <div class="ctrl-group search-wrap" id="search-wrap-ctrl">
     <div class="ctrl-label">Search Area</div>
     <input id="search-input" type="text" placeholder="Search area…" autocomplete="off">
     <div id="search-dropdown"></div>
   </div>
-  
+
   <div class="ctrl-group">
     <div class="ctrl-label">Industry</div>
     <select class="brc-sel" id="sel-industry"><option value="47 : Retail trade, except of motor vehicles and motorcycles" selected>47 : Retail trade, except of motor vehicles and motorcycles</option><option value="471 : Retail sale in non-specialised stores">   471 : Retail sale in non-specialised stores</option><option value="472 : Retail sale of food, beverages and tobacco in specialised stores">   472 : Retail sale of food, beverages and tobacco in specialised stores</option><option value="473 : Retail sale of automotive fuel in specialised stores">   473 : Retail sale of automotive fuel in specialised stores</option><option value="474 : Retail sale of information and communication equipment in specialised stores">   474 : Retail sale of information and communication equipment in specialised stores</option><option value="475 : Retail sale of other household equipment in specialised stores">   475 : Retail sale of other household equipment in specialised stores</option><option value="476 : Retail sale of cultural and recreation goods in specialised stores">   476 : Retail sale of cultural and recreation goods in specialised stores</option><option value="477 : Retail sale of other goods in specialised stores">   477 : Retail sale of other goods in specialised stores</option><option value="478 : Retail sale via stalls and markets">   478 : Retail sale via stalls and markets</option><option value="479 : Retail trade not in stores, stalls or markets">   479 : Retail trade not in stores, stalls or markets</option></select>
   </div>
-  
+
   <div class="ctrl-group">
     <div class="ctrl-label">Employees</div>
     <input type="range" id="emp-slider" min="0" max="2" step="1" value="1">
@@ -204,17 +188,17 @@
       <span>Part-time</span><span>All</span><span>Full-time</span>
     </div>
   </div>
-  
+
   <div class="ctrl-group">
     <div class="ctrl-label">Year</div>
     <select class="brc-sel" id="sel-year" style="min-width:90px"><option value="2022">2022</option><option value="2023">2023</option><option value="2024"selected>2024</option></select>
   </div>
-  
+
   <div class="ctrl-group">
     <div class="ctrl-label purple">Metric</div>
     <select class="brc-sel" id="sel-metric"><option value="Number of jobs"selected>Number of jobs</option><option value="Share of all local jobs">Share of all local jobs</option></select>
   </div>
-  
+
   <div class="ctrl-group" style="justify-content:flex-end">
     <button class="export-btn" onclick="exportExcel()">
       <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -232,22 +216,15 @@
 
 <div class="main">
   <div id="map-div"></div>
-  <div id="side-panel">
-    <div class="panel-inner">
-      <div class="panel-header">
-        <div>
-          <div class="panel-title" id="panel-name"></div>
-          <div class="panel-sub"   id="panel-sub"></div>
-        </div>
-        <button class="close-btn" onclick="closePanel()">&#x2715;</button>
+  <div id="chart-view">
+    <div class="chart-view-hdr">
+      <div>
+        <div class="chart-view-name" id="chart-view-name"></div>
+        <div class="chart-view-sub"  id="chart-view-sub"></div>
       </div>
-      <button class="chart-toggle-btn" id="chart-toggle-btn" onclick="toggleChart()">Hide Visual</button>
-      <div class="stat-cards" id="stat-cards"></div>
-      <div id="ts-chart-wrap">
-        <div id="ts-chart"></div>
-      </div>
-      <div class="panel-note" id="panel-note"></div>
+      <button class="back-btn" onclick="goBack()">&#8592; Back to map</button>
     </div>
+    <div id="full-ts-chart"></div>
   </div>
 </div>
 
@@ -281,6 +258,7 @@ let S = {
   empIdx:   1,
   industry: '47 : Retail trade, except of motor vehicles and motorcycles',
   metric:   "Number of jobs",
+  view:     "map",
 };
 
 // ── Formatting ─────────────────────────────────────────────
@@ -349,7 +327,7 @@ Plotly.newPlot("map-div", [trace, highlightTrace], layout, {responsive: true});
 document.getElementById("map-div").on("plotly_click", d => {
   if (d.points?.length && d.points[0].curveNumber === 0) {
     const code = d.points[0].location;
-    selectArea(code, NAME_LUT[code] || code, false);
+    selectArea(code, NAME_LUT[code] || code);
   }
 });
 
@@ -370,98 +348,74 @@ function render() {
   const emp  = EMP_MAP[S.empIdx];
   const key  = `${S.year}||${emp}||${S.industry}||${S.metric}`;
   const vals = MAP_DATA[key] || {};
-  
+
   notice.style.display = GRANULAR_INDS.includes(S.industry) ? "block" : "none";
-  
+
   const zArr = CODES.map(c => (vals[c] !== undefined ? vals[c] : null));
   const zMax = calcZmax(zArr);
-  
+
   const textArr = CODES.map(c => {
     const name = NAME_LUT[c] || c;
     return `<b>${name}</b><br>${S.metric}: ${fmtVal(vals[c], S.metric)}`;
   });
-  
+
   Plotly.restyle("map-div", { z: [zArr], text: [textArr], zmin: [0], zmax: [zMax] }, [0]);
-  updatePanel();
+  if (S.view === "chart") renderChart();
 }
 
 // ── Side panel ─────────────────────────────────────────────
-function updatePanel() {
-  const panel = document.getElementById("side-panel");
-  if (!S.selected) { panel.classList.remove("open"); return; }
-  panel.classList.add("open");
-  
-  const name = NAME_LUT[S.selected] || S.selected;
-  const emp  = EMP_MAP[S.empIdx];
-  const ind  = S.industry;
-  
-  document.getElementById("panel-name").textContent = name;
-  document.getElementById("panel-sub").textContent  =
-    ind.length > 58 ? ind.substring(0, 55) + "…" : ind;
-  
-  // Stat cards — current year
-  const jobsVal  = (MAP_DATA[`${S.year}||${emp}||${ind}||Number of jobs`]         || {})[S.selected];
-  const shareVal = (MAP_DATA[`${S.year}||${emp}||${ind}||Share of all local jobs`] || {})[S.selected];
-  
-  document.getElementById("stat-cards").innerHTML = `
-    <div class="stat-card">
-      <div class="stat-val">${fmtJobs(jobsVal ?? null)}</div>
-      <div class="stat-lbl">Jobs — ${S.year}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-val">${fmtShare(shareVal ?? null)}</div>
-      <div class="stat-lbl">Share — ${S.year}</div>
-    </div>`;
-
-// Bar chart — single series, whichever metric is selected
-  const barVals    = TS_YEARS.map(y => (MAP_DATA[`${y}||${emp}||${ind}||${S.metric}`] || {})[S.selected] ?? null);
-  const barColours = TS_YEARS.map(y => y === S.year ? "#F37021" : "#262262");
-  const isShare    = S.metric === "Share of all local jobs";
-  
-  document.getElementById("ts-chart-wrap").style.display = "block";
-  document.getElementById("chart-toggle-btn").textContent = "Hide Visual";
-  document.getElementById("chart-toggle-btn").classList.add("visible");
-  Plotly.react("ts-chart", [{
-    x: TS_YEARS, y: barVals,
-    type: "bar",
-    marker: { color: barColours },
-    hovertemplate: isShare ? "%{x}: %{y:.1f}%<extra></extra>" : "%{x}: %{y:,.0f}<extra></extra>",
-  }], {
-    height: 220,
-    margin: { l: 52, r: 12, t: 14, b: 30 },
-    paper_bgcolor: "#fff", plot_bgcolor: "#fff",
-    xaxis: {
-      tickfont: { size: 10, family: "Lato" },
-      gridcolor: "#E6E7E8", zeroline: false, type: "category",
-    },
-    yaxis: {
-      tickfont: { size: 10, family: "Lato" },
-      tickformat: isShare ? ".1f" : ",.0f",
-      ticksuffix: isShare ? "%" : "",
-      gridcolor: "#E6E7E8",
-    },
-    showlegend: false,
-  }, { displayModeBar: false, responsive: true });
-  
-  document.getElementById("panel-note").textContent =
-    "Source: ONS Business Register & Employment Survey (BRES) via Nomis. "
-    + "Orange bars indicate the selected year.";
+function goToChartView() {
+  S.view = "chart";
+  document.getElementById("map-div").style.display = "none";
+  document.getElementById("chart-view").classList.add("active");
+  document.getElementById("search-wrap-ctrl").style.display = "none";
+  renderChart();
 }
 
-function closePanel() {
+function goBack() {
+  S.view = "map";
   S.selected = null;
-  document.getElementById("side-panel").classList.remove("open");
-  document.getElementById("chart-toggle-btn").classList.remove("visible");
-  document.getElementById("search-input").value = "";
+  searchInput.value = "";
+  document.getElementById("map-div").style.display = "";
+  document.getElementById("chart-view").classList.remove("active");
+  document.getElementById("search-wrap-ctrl").style.display = "";
   clearShine();
 }
 
-function toggleChart() {
-  const wrap = document.getElementById("ts-chart-wrap");
-  const btn  = document.getElementById("chart-toggle-btn");
-  const hidden = wrap.style.display === "none";
-  wrap.style.display = hidden ? "block" : "none";
-  btn.textContent = hidden ? "Hide Visual" : "Show Visual";
+function renderChart() {
+  if (!S.selected || S.view !== "chart") return;
+  const name    = NAME_LUT[S.selected] || S.selected;
+  const emp     = EMP_MAP[S.empIdx];
+  const ind     = S.industry;
+  const isShare = S.metric === "Share of all local jobs";
+
+  document.getElementById("chart-view-name").textContent = name;
+  document.getElementById("chart-view-sub").textContent =
+    S.metric + " — " + emp + " — " + (ind.length > 50 ? ind.substring(0, 47) + "…" : ind);
+
+  const barVals    = TS_YEARS.map(y => (MAP_DATA[`${y}||${emp}||${ind}||${S.metric}`] || {})[S.selected] ?? null);
+  const barColours = TS_YEARS.map(y => y === S.year ? "#F37021" : "#262262");
+
+  Plotly.react("full-ts-chart", [{
+    x: TS_YEARS, y: barVals, type: "bar",
+    marker: { color: barColours },
+    hovertemplate: isShare ? "%{x}: %{y:.1f}%<extra></extra>" : "%{x}: %{y:,.0f}<extra></extra>",
+  }], {
+    margin: { l: 60, r: 40, t: 20, b: 50 },
+    paper_bgcolor: "#fff", plot_bgcolor: "#fff",
+    xaxis: {
+      tickfont: { size: 13, family: "Lato" },
+      gridcolor: "#E6E7E8", zeroline: false, type: "category",
+    },
+    yaxis: {
+      tickfont: { size: 13, family: "Lato" },
+      tickformat: isShare ? ".1f" : ",.0f",
+      ticksuffix: isShare ? "%" : "",
+      gridcolor: "#E6E7E8",
+      title: { text: isShare ? "% of local jobs" : "Number of jobs", font: { size: 12, family: "Lato", color: "#888" } },
+    },
+    showlegend: false,
+  }, { displayModeBar: false, responsive: true });
 }
 
 // ── Shine ──────────────────────────────────────────────────
@@ -488,25 +442,11 @@ const searchInput = document.getElementById("search-input");
 const dropdown    = document.getElementById("search-dropdown");
 let ddIdx = -1;
 
-function selectArea(code, name, doZoom) {
+function selectArea(code, name) {
   S.selected = code;
   if (name) searchInput.value = name;
   dropdown.style.display = "none";
-  
-  const cen = CENTROIDS[code];
-  if (cen && doZoom !== false) {
-    Plotly.relayout("map-div", {
-      "mapbox.center": { lat: cen.lat, lon: cen.lon },
-      "mapbox.zoom": SHINE_ZOOM,
-    });
-    const delay = hasSearched ? SHINE_DELAY_REPEAT : SHINE_DELAY_FIRST;
-    hasSearched = true;
-    clearTimeout(shineTimeout);
-    shineTimeout = setTimeout(() => showShine(cen.lat, cen.lon), delay);
-  } else if (cen) {
-    showShine(cen.lat, cen.lon);
-  }
-  render();
+  goToChartView();
 }
 
 searchInput.addEventListener("input", () => {
@@ -520,7 +460,7 @@ searchInput.addEventListener("input", () => {
     el.className = "dd-item"; el.textContent = n;
     el.addEventListener("mousedown", e => {
       e.preventDefault();
-      selectArea(NAME_TO_CODE[n], n, true);
+      selectArea(NAME_TO_CODE[n], n);
     });
     dropdown.appendChild(el);
   });
@@ -548,7 +488,7 @@ function exportExcel() {
   const metric = S.metric;
   const year   = S.year;
   const vals   = MAP_DATA[`${year}||${emp}||${ind}||${metric}`] || {};
-  
+
   const rows = ALL_NAMES.map(name => {
     const code = NAME_TO_CODE[name];
     return {
@@ -561,7 +501,7 @@ function exportExcel() {
       "Value":              (code && vals[code] !== undefined) ? vals[code] : null,
     };
   });
-  
+
   const ws = XLSX.utils.json_to_sheet(rows);
   ws["!cols"] = [
     { wch: 40 }, { wch: 18 }, { wch: 6 },
