@@ -107,6 +107,10 @@ header p  { font-size: 11px; color: #E6E7E8; margin-top: 2px; }
 .stat-val { font-size: 19px; font-weight: 900; color: #262262; }
 .stat-lbl { font-size: 10px; color: #777; margin-top: 2px; }
 .panel-note { font-size: 10px; color: #aaa; margin-top: 10px; line-height: 1.5; }
+.chart-hdr { display:flex; justify-content:space-between; align-items:center; margin:10px 0 4px; }
+.chart-ttl { font-size:10px; font-weight:700; color:#aaa; text-transform:uppercase; letter-spacing:.5px; }
+.chart-x   { background:none; border:none; cursor:pointer; color:#ccc; font-size:15px; line-height:1; padding:0; }
+.chart-x:hover { color:#555; }
 footer {
   background: #262262; color: #E6E7E8; font-size: 10px;
   padding: 5px 20px; flex-shrink: 0; display: flex; justify-content: space-between;
@@ -191,7 +195,13 @@ footer {
         <button class="close-btn" onclick="closePanel()">&#x2715;</button>
       </div>
       <div class="stat-cards" id="stat-cards"></div>
-      <div id="ts-chart"></div>
+      <div id="ts-chart-wrap">
+        <div class="chart-hdr">
+          <span class="chart-ttl">Time series</span>
+          <button class="chart-x" title="Hide chart" onclick="hideChart()">&#x2715;</button>
+        </div>
+        <div id="ts-chart"></div>
+      </div>
       <div class="panel-note" id="panel-note"></div>
     </div>
   </div>
@@ -340,6 +350,7 @@ function render() {
     geojson: currentGeo, locations: codes, z: zVals,
     text: hoverTexts, hovertemplate: '%{text}<extra></extra>',
     colorscale: colorscale(), zmin, zmax,
+    below: '',
     marker: { line: { width: 0.4, color: '#fff' } },
     colorbar: {
       title: { text: S.metric==='value' ? '£m' : '%', font: { family:'Lato', size:11, color:'#555' } },
@@ -359,6 +370,7 @@ function render() {
 
   const layout = {
     mapbox: { style:'carto-positron', center:{lat:54.2,lon:-2.5}, zoom:4.8 },
+    hovermode: 'closest',
     paper_bgcolor: '#f4f4f5',
     margin: { t:0, b:0, l:0, r:0 },
     annotations: [{
@@ -440,6 +452,10 @@ function closePanel() {
   clearShine();
 }
 
+function hideChart() {
+  document.getElementById('ts-chart-wrap').style.display = 'none';
+}
+
 function updatePanel() {
   const panel=document.getElementById('side-panel');
   const showPanel=S.selected && (S.metric==='value'||S.metric==='pct_output'||S.metric==='annual_change');
@@ -465,6 +481,7 @@ function updatePanel() {
   const lineCol=isChange?C.teal:C.navy, fillCol=isChange?C.teal+'33':C.navy+'22';
   const selIdx=tsYears.indexOf(parseInt(S.year));
 
+  document.getElementById('ts-chart-wrap').style.display = 'block';
   const traces=[{
     x:tsYears, y:tsVals, type:'scatter', mode:'lines',
     line:{color:lineCol,width:2}, fill:'tozeroy', fillcolor:fillCol,
