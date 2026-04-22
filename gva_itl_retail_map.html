@@ -110,6 +110,37 @@ header p  { font-size: 11px; color: #E6E7E8; margin-top: 2px; }
 }
 .back-btn:hover { opacity: 0.85; }
 #full-ts-chart { flex: 1; min-height: 0; }
+#tag-banner {
+  display: none; background: #fff; border-bottom: 2px solid #E6E7E8;
+  padding: 8px 20px; flex-shrink: 0;
+  flex-wrap: wrap; gap: 8px; align-items: center;
+}
+#tag-banner.active { display: flex; }
+.chart-search-wrap { position: relative; }
+#chart-search-input {
+  border: 1.5px solid #E6E7E8; border-radius: 4px; padding: 6px 10px;
+  font-family: 'Lato', sans-serif; font-size: 13px;
+  width: 190px; outline: none; color: #333; background: #F4F4F6;
+  transition: border-color .15s;
+}
+#chart-search-input:focus { border-color: #262262; }
+#chart-search-dropdown {
+  display: none; position: absolute; top: 100%; left: 0;
+  background: #fff; border: 1.5px solid #E6E7E8; border-top: none;
+  border-radius: 0 0 4px 4px; width: 100%; max-height: 200px; overflow-y: auto;
+  z-index: 9999; box-shadow: 0 4px 10px rgba(0,0,0,.1);
+}
+.area-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 8px 4px 12px; border-radius: 20px;
+  font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700; color: #fff;
+}
+.tag-x {
+  background: none; border: none; cursor: pointer;
+  color: rgba(255,255,255,.7); font-size: 14px; line-height: 1;
+  padding: 0 2px; transition: color .1s;
+}
+.tag-x:hover { color: #fff; }
 footer {
   background: #262262; color: #E6E7E8; font-size: 10px;
   padding: 5px 20px; flex-shrink: 0; display: flex; justify-content: space-between;
@@ -182,6 +213,14 @@ footer {
 
 </div>
 
+<div id="tag-banner">
+  <div class="chart-search-wrap">
+    <input id="chart-search-input" type="text" placeholder="Add more areas…" autocomplete="off">
+    <div id="chart-search-dropdown"></div>
+  </div>
+  <div id="selected-tags" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+</div>
+
 <div class="main">
   <div id="map-div"></div>
   <div id="chart-view">
@@ -208,13 +247,15 @@ const CENTROIDS_ALL = {"itl1":{"TLC":{"lat":55.020095,"lon":-1.905443},"TLD":{"l
 const YEARS         = [1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023];
 
 const C = { navy:'#262262', teal:'#00BBCE', orange:'#F37021', grey:'#E6E7E8', white:'#FFFFFF' };
+const AREA_COLOURS = ['#92278F','#00BBCE','#262262','#630460','#FFD400','#F06793','#8CC747'];
+const MAX_AREAS = 7;
 
 const GEO_LABELS  = { itl1:'Nations & Regions', itl2:'Sub-regions', itl3:'Local Areas' };
 const SHINE_ZOOMS = { itl1: 6, itl2: 7.5, itl3: 9 };
 const SHINE_DELAY_FIRST  = 1400;
 const SHINE_DELAY_REPEAT = 600;
 
-const S = { geo:'itl3', adjusted:true, metric:'value', year:'2023', since:'1998', selected:null, view:'map' };
+const S = { geo:'itl3', adjusted:true, metric:'value', year:'2023', since:'1998', selected:[], view:'map' };
 
 const gva       = () => GVA_ALL[S.geo];
 const geo       = () => GEO_ALL[S.geo];
@@ -230,7 +271,6 @@ function populateYears() {
 
 function setGeo() {
   S.geo = document.getElementById('geo-sel').value;
-  S.selected = null;
   if (S.view === 'chart') goBack();
   document.getElementById('search-input').value = '';
   document.getElementById('search-dropdown').style.display = 'none';
@@ -376,7 +416,13 @@ function render() {
   if (!mapInitialised) {
     Plotly.newPlot('map-div', [choropleth, shineDots], layout, cfg);
     document.getElementById('map-div').on('plotly_click', d => {
-      if (d.points?.length && d.points[0].curveNumber===0) selectArea(d.points[0].location);
+      if (d.points?.length && d.points[0].curveNumber===0) {
+        const code = d.points[0].location;
+        if (S.metric === 'change_since') return;
+        addArea(code);
+        if (S.view === 'map') goToChartView();
+        else renderChart();
+      }
     });
     mapInitialised = true;
   } else {
@@ -423,12 +469,57 @@ searchInput.addEventListener('keydown', e => {
 document.addEventListener('click', e => { if (!e.target.closest('.search-wrap')) dropdown.style.display='none'; });
 
 function selectArea(code) {
-  S.selected = code;
+  // Search-bar selection: zoom + shine + toast only (no chart view)
   searchInput.value = gva()[code]?.name ?? code;
   dropdown.style.display = 'none';
-  if (S.metric !== 'change_since') {
-    goToChartView();
+  const cen = centroids()[code];
+  if (cen) {
+    Plotly.relayout('map-div', { 'mapbox.center':{lat:cen.lat,lon:cen.lon}, 'mapbox.zoom':SHINE_ZOOMS[S.geo] });
+    clearTimeout(shineTimeout);
+    hasSearched = true;
+    shineTimeout = setTimeout(() => showShine(cen.lat, cen.lon), SHINE_DELAY_FIRST);
   }
+  if (S.metric !== 'change_since') showToast('Click the area on the map to view its chart');
+}
+
+function addArea(code) {
+  if (S.selected.includes(code)) return;
+  if (S.selected.length >= MAX_AREAS) { showToast('Maximum 7 areas reached'); return; }
+  S.selected.push(code);
+  if (S.view === 'chart') updateTagBanner();
+}
+
+function removeArea(code) {
+  S.selected = S.selected.filter(c => c !== code);
+  if (S.selected.length === 0) { goBack(); return; }
+  updateTagBanner();
+  renderChart();
+}
+
+function updateTagBanner() {
+  const container = document.getElementById('selected-tags');
+  container.innerHTML = '';
+  S.selected.forEach((code, i) => {
+    const name = gva()[code]?.name ?? code;
+    const tag = document.createElement('div');
+    tag.className = 'area-tag';
+    tag.style.background = AREA_COLOURS[i];
+    tag.innerHTML = `${name} <button class="tag-x" onclick="removeArea('${code}')">&#x2715;</button>`;
+    container.appendChild(tag);
+  });
+}
+
+function showToast(msg) {
+  let t = document.getElementById('map-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'map-toast';
+    t.style.cssText = 'position:fixed;bottom:44px;left:50%;transform:translateX(-50%);background:rgba(38,34,98,.92);color:#fff;padding:9px 22px;border-radius:6px;font-family:Lato,sans-serif;font-size:13px;font-weight:700;z-index:9999;transition:opacity .5s;pointer-events:none;white-space:nowrap;';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg; t.style.opacity = '1';
+  clearTimeout(t._t);
+  t._t = setTimeout(() => { t.style.opacity = '0'; }, 3000);
 }
 
 function goToChartView() {
@@ -436,53 +527,64 @@ function goToChartView() {
   document.getElementById('map-div').style.display = 'none';
   document.getElementById('chart-view').classList.add('active');
   document.getElementById('search-wrap-ctrl').style.display = 'none';
+  document.getElementById('tag-banner').classList.add('active');
+  updateTagBanner();
   renderChart();
 }
 
 function goBack() {
   S.view = 'map';
-  S.selected = null;
+  S.selected = [];
   searchInput.value = '';
   document.getElementById('map-div').style.display = '';
   document.getElementById('chart-view').classList.remove('active');
   document.getElementById('search-wrap-ctrl').style.display = '';
+  document.getElementById('tag-banner').classList.remove('active');
+  document.getElementById('selected-tags').innerHTML = '';
   clearShine();
 }
 
 function renderChart() {
-  if (!S.selected || S.view !== 'chart') return;
-  const code = S.selected, d = gva()[code], name = d?.name ?? code;
+  if (!S.selected.length || S.view !== 'chart') return;
 
-  document.getElementById('chart-view-name').textContent = name;
-  document.getElementById('chart-view-sub').textContent = {
+  const subLabel = {
     value:         S.adjusted ? 'Retail GVA — inflation-adjusted (CVM, 2022 prices)' : 'Retail GVA — current prices (nominal)',
     pct_output:    'Retail GVA as % of total local GVA',
     annual_change: 'Year-on-year % change in retail GVA',
   }[S.metric];
+  document.getElementById('chart-view-name').textContent =
+    S.selected.length === 1 ? (gva()[S.selected[0]]?.name ?? S.selected[0]) : 'Area Comparison';
+  document.getElementById('chart-view-sub').textContent = subLabel;
 
   const tsYears  = S.metric === 'annual_change' ? YEARS.slice(1) : YEARS;
-  const tsVals   = tsYears.map(y => calcValue(code, String(y)));
   const isChange = S.metric === 'annual_change';
-  const lineCol  = isChange ? C.teal : C.navy;
-  const fillCol  = isChange ? C.teal + '33' : C.navy + '22';
   const selIdx   = tsYears.indexOf(parseInt(S.year));
+  const multi    = S.selected.length > 1;
 
-  const traces = [{
-    x: tsYears, y: tsVals, type: 'scatter', mode: 'lines',
-    line: {color: lineCol, width: 2.5}, fill: 'tozeroy', fillcolor: fillCol,
-    hovertemplate: S.metric === 'value' ? '%{x}: £%{y:,.0f}m<extra></extra>' : '%{x}: %{y:.1f}%<extra></extra>',
-  }];
-  if (selIdx >= 0 && tsVals[selIdx] != null) {
+  const traces = [];
+  S.selected.forEach((code, i) => {
+    const d = gva()[code], name = d?.name ?? code;
+    const col = AREA_COLOURS[i];
+    const tsVals = tsYears.map(y => calcValue(code, String(y)));
     traces.push({
-      x: [tsYears[selIdx]], y: [tsVals[selIdx]], type: 'scatter', mode: 'markers',
-      marker: {color: C.orange, size: 10, line: {color: '#fff', width: 2}},
-      hovertemplate: `<b>${S.year}</b>: ${fmt(tsVals[selIdx])}<extra></extra>`,
-      showlegend: false,
+      x: tsYears, y: tsVals, type: 'scatter', mode: 'lines',
+      name, line: {color: col, width: 2.5},
+      fill: multi ? 'none' : 'tozeroy',
+      fillcolor: col + '22',
+      hovertemplate: `<b>${name}</b> | %{x}: ` + (S.metric === 'value' ? '£%{y:,.0f}m' : '%{y:.1f}%') + '<extra></extra>',
     });
-  }
+    if (selIdx >= 0 && tsVals[selIdx] != null) {
+      traces.push({
+        x: [tsYears[selIdx]], y: [tsVals[selIdx]], type: 'scatter', mode: 'markers',
+        marker: {color: col, size: 9, line: {color: '#fff', width: 1.5}},
+        hovertemplate: `<b>${name}</b> | ${S.year}: ${fmt(tsVals[selIdx])}<extra></extra>`,
+        showlegend: false,
+      });
+    }
+  });
 
   Plotly.react('full-ts-chart', traces, {
-    margin: {l:60, r:40, t:20, b:50},
+    margin: {l:60, r:40, t:20, b: multi ? 80 : 50},
     paper_bgcolor: '#fff', plot_bgcolor: '#fff',
     xaxis: {
       tickfont: {size:13, family:'Lato'}, gridcolor: C.grey,
@@ -496,10 +598,51 @@ function renderChart() {
       zeroline: isChange, zerolinecolor: '#ddd', zerolinewidth: 1,
       title: {text: S.metric === 'value' ? '£ millions' : '%', font: {size:12, family:'Lato', color:'#888'}},
     },
-    showlegend: false,
+    showlegend: multi,
+    legend: {font: {family:'Lato', size:11}, orientation:'h', y:-0.18, x:0},
     shapes: isChange ? [{type:'line', x0:tsYears[0], x1:tsYears[tsYears.length-1], y0:0, y1:0, line:{color:'#ddd',width:1,dash:'dot'}}] : [],
   }, {displayModeBar: false, responsive: true});
 }
+
+// ── Chart-view search (adds areas) ─────────────────────────
+const chartSearchInput = document.getElementById('chart-search-input');
+const chartDropdown    = document.getElementById('chart-search-dropdown');
+let chartDdIdx = -1;
+
+chartSearchInput.addEventListener('input', () => {
+  const q = chartSearchInput.value.toLowerCase().trim();
+  chartDropdown.innerHTML = ''; chartDdIdx = -1;
+  if (!q) { chartDropdown.style.display = 'none'; return; }
+  const hits = currentAreas().filter(a => a.name.toLowerCase().includes(q) && !S.selected.includes(a.code)).slice(0, 25);
+  if (!hits.length) { chartDropdown.style.display = 'none'; return; }
+  hits.forEach(a => {
+    const el = document.createElement('div');
+    el.className = 'dd-item'; el.textContent = a.name;
+    el.addEventListener('mousedown', e => {
+      e.preventDefault();
+      addArea(a.code);
+      renderChart();
+      chartSearchInput.value = '';
+      chartDropdown.style.display = 'none';
+    });
+    chartDropdown.appendChild(el);
+  });
+  chartDropdown.style.display = 'block';
+});
+chartSearchInput.addEventListener('blur', () => { setTimeout(() => { chartDropdown.style.display = 'none'; }, 150); });
+chartSearchInput.addEventListener('keydown', e => {
+  const items = chartDropdown.querySelectorAll('.dd-item');
+  if (!items.length) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); chartDdIdx = Math.min(chartDdIdx + 1, items.length - 1); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); chartDdIdx = Math.max(chartDdIdx - 1, 0); }
+  else if (e.key === 'Enter' && chartDdIdx >= 0) { e.preventDefault(); items[chartDdIdx].dispatchEvent(new MouseEvent('mousedown')); return; }
+  else if (e.key === 'Escape') { chartDropdown.style.display = 'none'; return; }
+  items.forEach((el, i) => el.classList.toggle('active', i === chartDdIdx));
+  if (chartDdIdx >= 0) items[chartDdIdx].scrollIntoView({block: 'nearest'});
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('.chart-search-wrap')) chartDropdown.style.display = 'none';
+});
 
 /* ── Excel export ──────────────────────────────────────────────────────────── */
 function metricLabel() {
@@ -518,26 +661,19 @@ function exportExcel() {
 
   let rows, sheetName, filename;
 
-  if (S.selected) {
-    // Time-series for selected area
-    const code = S.selected;
-    const name = gva()[code]?.name ?? code;
+  if (S.selected.length) {
+    // Time-series for selected area(s)
     const tsYears = S.metric==='annual_change' ? YEARS.slice(1) : YEARS;
-    rows = tsYears.map(y => {
-      const v = calcValue(code, String(y));
-      return {
-        'Geography Type': geoLabel,
-        'ITL Code':       code,
-        'Area':           name,
-        'Metric':         mLabel,
-        'Adjustment':     adjLabel,
-        'Year':           y,
-        'Value':          v,
-        'Formatted':      fmt(v),
-      };
+    rows = [];
+    S.selected.forEach(code => {
+      const name = gva()[code]?.name ?? code;
+      tsYears.forEach(y => {
+        const v = calcValue(code, String(y));
+        rows.push({ 'Geography Type':geoLabel, 'ITL Code':code, 'Area':name, 'Metric':mLabel, 'Adjustment':adjLabel, 'Year':y, 'Value':v, 'Formatted':fmt(v) });
+      });
     });
-    sheetName = name.substring(0, 31);
-    filename  = `RetailGVA_${name.replace(/[^a-zA-Z0-9]/g,'_')}_${S.metric}_${adjLabel.replace(/ /g,'_')}.xlsx`;
+    sheetName = S.selected.length === 1 ? (gva()[S.selected[0]]?.name ?? S.selected[0]).substring(0, 31) : 'Multiple Areas';
+    filename  = `RetailGVA_SelectedAreas_${S.metric}_${adjLabel.replace(/ /g,'_')}.xlsx`;
   } else {
     // All areas, selected year
     rows = Object.entries(gva()).map(([code, d]) => {
@@ -571,7 +707,7 @@ function exportExcel() {
     ['Geography:', geoLabel],
     ['Metric:', mLabel],
     ['Adjustment:', adjLabel],
-    S.selected ? ['Area:', gva()[S.selected]?.name] : ['Year:', S.year],
+    S.selected.length ? ['Areas:', S.selected.map(c => gva()[c]?.name ?? c).join(', ')] : ['Year:', S.year],
     ['Exported:', new Date().toLocaleDateString('en-GB')],
     ['Notes:', 'Values in £ millions. CVM = Chained Volume Measures, base year 2022.'],
   ]);
