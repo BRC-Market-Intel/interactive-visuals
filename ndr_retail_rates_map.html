@@ -291,7 +291,7 @@ const isProps = () => S.metric === 'Number of Properties';
 
 function fmtVal(v) {
   if (v == null || isNaN(v)) return '\u2014';
-  if (isRV())    return '\u00a3' + (v / 1000).toFixed(2) + 'm';
+  if (isRV())    return '\u00a3' + (v / 1000).toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + 'm';
   if (isPct())   return v.toFixed(1) + '%';
   if (isProps()) return Math.round(v).toLocaleString('en-GB');
   return String(v);
