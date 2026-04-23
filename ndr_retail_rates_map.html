@@ -362,9 +362,7 @@ function render() {
   }[S.metric];
   document.getElementById('footer-metric').textContent = `${metricLabel} | ${S.year}`;
 
-  const colorscale = isPct()
-    ? [[0, C.grey], [1, C.teal]]
-    : [[0, C.grey], [1, C.navy]];
+  const colorscale = [[0, C.grey], [1, C.navy]];
 
   const choropleth = {
     type: 'choroplethmapbox',
