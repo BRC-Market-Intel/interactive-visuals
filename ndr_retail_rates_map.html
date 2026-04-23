@@ -175,7 +175,7 @@ footer {
   <div class="brc-bar"></div>
   <div>
     <h1>Retail Business Rates by Area</h1>
-    <p>NDR Stock of Properties &nbsp;&bull;&nbsp; DLUHC &nbsp;&bull;&nbsp; England &amp; Wales &nbsp;&bull;&nbsp; Rateable value in £ thousands</p>
+    <p>NDR Stock of Properties &nbsp;&bull;&nbsp; DLUHC &nbsp;&bull;&nbsp; England &amp; Wales &nbsp;&bull;&nbsp; Rateable value in £ millions</p>
   </div>
 </header>
 
@@ -245,7 +245,7 @@ footer {
 </div>
 
 <footer>
-  <span>British Retail Consortium &bull; Source: DLUHC NDR Stock of Properties &bull; Rateable value in £ thousands</span>
+  <span>British Retail Consortium &bull; Source: DLUHC NDR Stock of Properties &bull; Rateable value in £ millions</span>
   <span id="footer-metric"></span>
 </footer>
 
@@ -291,7 +291,7 @@ const isProps = () => S.metric === 'Number of Properties';
 
 function fmtVal(v) {
   if (v == null || isNaN(v)) return '\u2014';
-  if (isRV())    return '\u00a3' + Math.round(v).toLocaleString('en-GB') + 'k';
+  if (isRV())    return '\u00a3' + (v / 1000).toFixed(2) + 'm';
   if (isPct())   return v.toFixed(1) + '%';
   if (isProps()) return Math.round(v).toLocaleString('en-GB');
   return String(v);
@@ -343,7 +343,10 @@ function render() {
 
   const vals   = getVals();
   const codeArr = codes();
-  const zArr   = codeArr.map(c => vals[c] ?? null);
+  const zArr   = codeArr.map(c => {
+    const v = vals[c] ?? null;
+    return (isRV() && v != null) ? v / 1000 : v;
+  });
   const zmax   = calcZmax(zArr);
   const zmin   = isPct() ? 0 : (isRV() || isProps() ? 0 : null);
 
@@ -352,7 +355,7 @@ function render() {
   );
 
   const metricLabel = {
-    'Overall Rateable Value':      'Retail Rateable Value (£ thousands)',
+    'Overall Rateable Value':      'Retail Rateable Value (£ millions)',
     'Share of all Rateable Value': '% of all Rateable Value',
     'Number of Properties':        'Number of Retail Properties',
     'Share of all Properties':     '% of all Properties',
@@ -372,13 +375,13 @@ function render() {
     marker: { line: { width: 0.3, color: '#fff' } },
     colorbar: {
       title: {
-        text: isRV() ? '£k' : (isProps() ? 'count' : '%'),
+        text: isRV() ? '£m' : (isProps() ? 'count' : '%'),
         font: { family: 'Lato', size: 11, color: '#555' },
       },
       thickness: 12, len: 0.55,
       x: 0.01, xanchor: 'left',
       tickfont: { family: 'Lato', size: 10 },
-      tickformat: isRV() ? ',.0f' : (isProps() ? ',.0f' : '.1f'),
+      tickformat: isRV() ? ',.2f' : (isProps() ? ',.0f' : '.1f'),
     },
   };
 
@@ -569,7 +572,10 @@ function renderChart() {
   S.selected.forEach((code, i) => {
     const name = nameLut()[code] ?? code;
     const col  = AREA_COLOURS[i];
-    const barVals  = YEARS.map(y => (MAP_DATA[S.geo]?.[y]?.[S.metric]?.[code]) ?? null);
+    const barVals  = YEARS.map(y => {
+      const v = MAP_DATA[S.geo]?.[y]?.[S.metric]?.[code] ?? null;
+      return (isRV() && v != null) ? v / 1000 : v;
+    });
     const barCols  = multi
       ? barVals.map(() => col)
       : YEARS.map(y => y === S.year ? col : col + '99');
@@ -579,7 +585,7 @@ function renderChart() {
       type: 'bar', name,
       marker: { color: barCols },
       hovertemplate: `<b>${name}</b> | %{x}: ${
-        isRV() ? '\u00a3%{y:,.0f}k' : (isPct() ? '%{y:.1f}%' : '%{y:,.0f}')
+        isRV() ? '\u00a3%{y:,.2f}m' : (isPct() ? '%{y:.1f}%' : '%{y:,.0f}')
       }<extra></extra>`,
     });
   });
@@ -594,12 +600,12 @@ function renderChart() {
     },
     yaxis: {
       tickfont: { size: 13, family: 'Lato' },
-      tickformat: isRV() ? ',.0f' : (isPct() ? '.1f' : ',.0f'),
+      tickformat: isRV() ? ',.2f' : (isPct() ? '.1f' : ',.0f'),
       tickprefix: isRV() ? '\u00a3' : '',
-      ticksuffix: isPct() ? '%' : (isRV() ? 'k' : ''),
+      ticksuffix: isPct() ? '%' : (isRV() ? 'm' : ''),
       gridcolor: C.grey,
       title: {
-        text: isRV() ? '\u00a3 thousands' : (isPct() ? '%' : 'Number of properties'),
+        text: isRV() ? '\u00a3 millions' : (isPct() ? '%' : 'Number of properties'),
         font: { size: 12, family: 'Lato', color: '#888' },
       },
     },
@@ -718,7 +724,7 @@ function exportExcel() {
     ['Metric:', S.metric],
     ['Year:', S.year],
     ['Exported:', new Date().toLocaleDateString('en-GB')],
-    ['Notes:', 'Rateable value in £ thousands. 2024 PCON data cross-walked to July 2024 boundaries via name matching.'],
+    ['Notes:', 'Rateable value shown in £ millions (source data in £ thousands, divided by 1,000). 2024 PCON data cross-walked to July 2024 boundaries via name matching.'],
   ]);
   XLSX.utils.book_append_sheet(wb, meta, 'Metadata');
   XLSX.writeFile(wb, filename);
