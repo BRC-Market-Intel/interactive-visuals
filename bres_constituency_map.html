@@ -487,19 +487,21 @@ function renderChart() {
     const name    = NAME_LUT[code] || code;
     const col     = AREA_COLOURS[i];
     const barVals = TS_YEARS.map(y => (MAP_DATA[`${y}||${emp}||${ind}||${S.metric}`] || {})[code] ?? null);
-    const barCols = TS_YEARS.map(y => y === S.year ? col : col + "99");
+    // Single area: highlight selected year; multi: solid colour per area
+    const barCols = multi
+      ? barVals.map(() => col)
+      : TS_YEARS.map(y => y === S.year ? col : col + "99");
     traces.push({
       x: TS_YEARS, y: barVals,
-      type: multi ? "scatter" : "bar",
-      mode: multi ? "lines" : undefined,
+      type: "bar",
       name,
-      marker: multi ? undefined : { color: barCols },
-      line: multi ? { color: col, width: 2.5 } : undefined,
+      marker: { color: barCols },
       hovertemplate: `<b>${name}</b> | %{x}: ` + (isShare ? "%{y:.1f}%" : "%{y:,.0f}") + "<extra></extra>",
     });
   });
 
   Plotly.react("full-ts-chart", traces, {
+    barmode: multi ? "group" : "relative",
     margin: { l: 60, r: 40, t: 20, b: multi ? 80 : 50 },
     paper_bgcolor: "#fff", plot_bgcolor: "#fff",
     xaxis: {
