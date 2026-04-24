@@ -506,19 +506,21 @@ function _renderLine(emp, multi) {
 }
 
 function _renderBar(emp, multi) {
-  const geo    = curGeo();
-  const traces = [];
+  const geo      = curGeo();
+  // Share is only available 2022-2024 for PCONs; full range for ITL1/GB
+  const barYears = S.geo === 'pcon' ? NEW_YEARS : TS_YEARS;
+  const traces   = [];
   S.selected.forEach((code, i) => {
     const name  = geo.code_to_name[code] || code;
     const col   = AREA_COLOURS[i % AREA_COLOURS.length];
-    const yVals = TS_YEARS.map(y =>
+    const yVals = barYears.map(y =>
       ((MAP_DATA[S.geo][`${y}||${S.industry}||${emp}||Share of all local jobs`] || {})[code]) ?? null
     );
     const barCols = multi
       ? yVals.map(() => col)
-      : TS_YEARS.map(y => String(y) === S.year ? col : col + '99');
+      : barYears.map(y => String(y) === S.year ? col : col + '99');
     traces.push({
-      x: TS_YEARS, y: yVals, type:'bar', name,
+      x: barYears, y: yVals, type:'bar', name,
       marker:{color:barCols},
       hovertemplate:`<b>${name}</b> | %{x}: %{y:.1f}%<extra></extra>`,
     });
