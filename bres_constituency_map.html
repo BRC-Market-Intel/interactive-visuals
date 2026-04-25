@@ -525,7 +525,7 @@ function renderChart() {
   const isShare = S.metric === 'Share of all local jobs';
   const multi   = S.selected.length > 1;
   document.getElementById('chart-view-name').textContent =
-    S.natTrend ? cardLabel()
+    S.natTrend ? (S.natUK ? 'United Kingdom' : 'Great Britain')
     : multi ? 'Area Comparison'
     : (geo.code_to_name[S.selected[0]] || S.selected[0]);
   const indShort = S.industry.length > 50 ? S.industry.substring(0,47)+'\u2026' : S.industry;
