@@ -96,7 +96,7 @@
   #suppression-notice  { background: #FFFBEA; border-left-color: var(--yellow); }
   .main { flex: 1; display: flex; overflow: hidden; min-height: 0; position: relative; }
   #map-div { flex: 1; min-width: 0; }
-
+  
   /* ── National stat card ──────────────────────────────────── */
   #nat-card {
     position: absolute; bottom: 30px; left: 16px; z-index: 400;
@@ -240,7 +240,7 @@
 
 <div class="main">
   <div id="map-div"></div>
-
+  
   <!-- National stat card — bottom-left of map, hidden in chart view -->
   <div id="nat-card">
     <div class="nc-label" id="nc-label">Great Britain</div>
@@ -480,7 +480,7 @@ function updateTagBanner() {
   const el = document.getElementById('selected-tags');
   el.innerHTML = '';
   S.selected.forEach((code, i) => {
-    const name = curGeo().code_to_name[code] || code;
+    const name = (S.natTrend && code === 'GB') ? (S.natUK ? 'United Kingdom' : 'Great Britain') : (curGeo().code_to_name[code] || code);
     const tag  = document.createElement('div');
     tag.className = 'area-tag';
     tag.style.background = AREA_COLOURS[i % AREA_COLOURS.length];
@@ -717,7 +717,7 @@ function exportExcel() {
   const metric = S.metric;
   const geo    = curGeo();
   let rows, sheetName, filename;
-
+  
   if (S.selected.length) {
     const exportYears = metric === 'Share of all local jobs' ? NEW_YEARS : TS_YEARS;
     rows = [];
@@ -751,7 +751,7 @@ function exportExcel() {
     sheetName = S.year;
     filename  = `BRES_${S.geo}_${ind.split(':')[0].trim()}_${emp.replace(/ /g,'_')}_${S.year}_${metric.replace(/ /g,'_')}.xlsx`;
   }
-
+  
   const ws = XLSX.utils.json_to_sheet(rows);
   ws['!cols'] = [{wch:16},{wch:16},{wch:40},{wch:6},{wch:65},{wch:22},{wch:24},{wch:12},{wch:36}];
   const wb = XLSX.utils.book_new();
