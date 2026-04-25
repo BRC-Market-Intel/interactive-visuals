@@ -374,6 +374,15 @@ function render() {
   syncNotices();
 }
 
+// Called on geo type change — purges Plotly entirely so newPlot reinitialises
+// the mapbox layer. Plotly.react cannot reliably switch between geojsons with
+// very different feature counts (e.g. 650 PCONs → 1 GB polygon).
+function resetAndRender() {
+  Plotly.purge('map-div');
+  mapInit = false;
+  render();
+}
+
 // ── Controls ─────────────────────────────────────────────────
 document.getElementById('sel-geo').addEventListener('change', function() {
   S.geo = this.value; S.selected = [];
@@ -382,10 +391,15 @@ document.getElementById('sel-geo').addEventListener('change', function() {
   document.getElementById('search-wrap-ctrl').style.display = isGB ? 'none' : '';
   document.getElementById('search-label').textContent = GEO_SEARCH_LABEL[S.geo];
   document.getElementById('search-input').value = '';
-  syncGbDropdownLabel(); clearShine(); syncNotices(); render();
+  syncGbDropdownLabel(); clearShine(); syncNotices(); resetAndRender();
 });
 document.getElementById('sel-industry').addEventListener('change', function() {
-  S.industry = this.value; syncGbDropdownLabel(); syncNotices(); render();
+  const prevWasUK = isSIC47();
+  S.industry = this.value;
+  syncGbDropdownLabel(); syncNotices();
+  // Switching SIC 47 ↔ 3-digit on GB view changes the geojson; force full reset
+  if (S.geo === 'gb' && prevWasUK !== isSIC47()) { resetAndRender(); }
+  else { render(); }
   if (S.view === 'chart') renderChart();
 });
 document.getElementById('emp-slider').addEventListener('input', function() {
