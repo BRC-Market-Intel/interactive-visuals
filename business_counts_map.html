@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Retail Business Counts by Area | BRC</title>
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
-<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -73,7 +73,7 @@ header p  { font-size: 11px; color: #E6E7E8; margin-top: 2px; }
 }
 .yr-sel:focus { border-color: #262262; }
 .main { flex: 1; display: flex; overflow: hidden; min-height: 0; position: relative; }
-#map-div { flex: 1; min-width: 0; }
+#map-div { flex: 1; min-width: 0; height: 100%; }
 /* ── National stat card (mirrors BRES map) ── */
 #nat-card {
   position: absolute; bottom: 30px; left: 16px; z-index: 400;
@@ -773,6 +773,6 @@ function viewNationalTrend() {
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-render();
+window.onload = render;
 </body>
 </html>
