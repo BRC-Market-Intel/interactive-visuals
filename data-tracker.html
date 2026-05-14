@@ -269,7 +269,7 @@
             gap: 20px;
             padding: 20px;
             height: calc(100vh - 120px);
-            min-height: 500px;
+            min-height: 450px;
             max-height: 800px;
         }
 
@@ -438,38 +438,29 @@
         .tab-content {
             width: 100%;
             background: white;
-            position: absolute;
-            top: 60px;
-            left: 0;
-            right: 0;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.1s ease;
+            display: none;
         }
 
         .tab-content.active {
-            position: relative;
-            top: 0;
-            opacity: 1;
-            visibility: visible;
+            display: block;
         }
 
         .chart-container {
             width: 100%;
             height: calc(100vh - 120px);
-            min-height: 500px;
+            min-height: 450px;
             max-height: 800px;
         }
 
         @media (max-width: 1200px) {
             .chart-container {
                 height: calc(100vh - 100px);
-                min-height: 450px;
+                min-height: 400px;
             }
 
             .custom-chart-builder {
                 height: calc(100vh - 100px);
-                min-height: 450px;
+                min-height: 400px;
             }
         }
 
@@ -481,7 +472,7 @@
 
             .chart-container {
                 height: calc(100vh - 80px);
-                min-height: 400px;
+                min-height: 350px;
             }
         }
     </style>
