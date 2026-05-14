@@ -96,6 +96,22 @@
             border-color: #262262;
         }
 
+        .frequency-selector select.purple-sel {
+            background-color: #faf5ff;
+            border-color: #92278F;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%2392278F'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            padding-right: 28px;
+            color: #92278F;
+            font-weight: 600;
+        }
+
+        .frequency-selector select.purple-sel:hover,
+        .frequency-selector select.purple-sel:focus {
+            border-color: #92278F;
+        }
+
         .chart-type-toggle {
             display: flex;
             border: 2px solid #e0e0e0;
@@ -414,54 +430,6 @@
             padding: 40px;
         }
 
-        .tabs {
-            display: flex;
-            border-bottom: 2px solid #e0e0e0;
-            background: white;
-            margin: 0;
-            padding: 0;
-        }
-
-        .tab-button {
-            flex: 1;
-            padding: 15px 20px;
-            background: white;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            font-family: 'Lato', sans-serif;
-            font-weight: 500;
-            color: #666;
-            transition: all 0.3s ease;
-            border-bottom: 3px solid transparent;
-        }
-
-        .tab-button:hover {
-            background: #f5f5f5;
-            color: #262262;
-        }
-
-        .tab-button.active {
-            color: #262262;
-            border-bottom: 3px solid #262262;
-            background: white;
-        }
-
-        .tab-button.build-your-own {
-            color: #00BBCE;
-        }
-
-        .tab-button.build-your-own:hover {
-            background: #f5f5f5;
-            color: #00BBCE;
-        }
-
-        .tab-button.build-your-own.active {
-            color: #00BBCE;
-            border-bottom: 3px solid #00BBCE;
-            background: white;
-        }
-
         .tab-content {
             width: 100%;
             background: white;
@@ -490,6 +458,17 @@
 <body>
     <div class="tab-container">
         <div class="frequency-selector">
+            <div class="selector-group">
+                <label for="monitor-select">Monitor:</label>
+                <select id="monitor-select" class="purple-sel" onchange="changeMonitor(this.value)">
+                    <option value="retail-sales" selected>Retail Sales</option>
+                    <option value="shop-prices">Shop Prices</option>
+                    <option value="consumer-sentiment">Consumer Sentiment</option>
+                    <option value="footfall">Footfall</option>
+                    <option value="custom-chart">Build Your Own</option>
+                </select>
+            </div>
+
             <div class="selector-group">
                 <label for="frequency-select">Frequency:</label>
                 <select id="frequency-select" onchange="changeFrequency(this.value)">
@@ -527,14 +506,6 @@
                 <span style="margin-right: 5px;">ℹ️</span> Sentiment Qs
             </button>
             <button class="export-button" onclick="exportToExcel()">Export to Excel</button>
-        </div>
-
-        <div class="tabs">
-            <button class="tab-button active" onclick="openTab(event, 'retail-sales')">Retail Sales</button>
-            <button class="tab-button" onclick="openTab(event, 'shop-prices')">Shop Prices</button>
-            <button class="tab-button" onclick="openTab(event, 'consumer-sentiment')">Consumer Sentiment</button>
-            <button class="tab-button" onclick="openTab(event, 'footfall')">Footfall</button>
-            <button class="tab-button build-your-own" onclick="openTab(event, 'custom-chart')">Build Your Own</button>
         </div>
 
         <div id="retail-sales" class="tab-content active">
@@ -820,6 +791,14 @@
             }
         }
 
+        function changeMonitor(monitorValue) {
+            // Create a fake event object for openTab
+            var fakeEvent = {
+                currentTarget: document.getElementById('monitor-select')
+            };
+            openTab(fakeEvent, monitorValue);
+        }
+
         function createChart(chartId, chartType, frequency, displayType) {
             var data, layout;
 
@@ -922,11 +901,14 @@
             if (chartsCreated['retail-sales-chart']) {
                 updateChart('retail-sales-chart', 'rsm', currentFrequency, chartType);
             }
-            if (chartsCreated['spi-chart']) {
-                updateChart('spi-chart', 'spm', currentFrequency, chartType);
+            if (chartsCreated['spm-chart']) {
+                updateChart('spm-chart', 'spm', currentFrequency, chartType);
             }
-            if (chartsCreated['footfall-chart']) {
-                updateChart('footfall-chart', 'ffm', currentFrequency, chartType);
+            if (chartsCreated['csm-chart']) {
+                updateChart('csm-chart', 'csm', currentFrequency, chartType);
+            }
+            if (chartsCreated['ffm-chart']) {
+                updateChart('ffm-chart', 'ffm', currentFrequency, chartType);
             }
 
             // Update custom chart if it has selections
@@ -1024,7 +1006,7 @@
         }
 
         function openTab(evt, tabName) {
-            var i, tabcontent, tabbuttons;
+            var i, tabcontent;
 
             currentTab = tabName;
 
@@ -1036,13 +1018,10 @@
                 tabcontent[i].classList.remove("active");
             }
 
-            tabbuttons = document.getElementsByClassName("tab-button");
-            for (i = 0; i < tabbuttons.length; i++) {
-                tabbuttons[i].classList.remove("active");
-            }
+            // Update the monitor dropdown to reflect current tab
+            document.getElementById('monitor-select').value = tabName;
 
             document.getElementById(tabName).classList.add("active");
-            evt.currentTarget.classList.add("active");
 
             // Handle custom chart tab differently
             if (tabName === 'custom-chart') {
