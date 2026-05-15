@@ -693,6 +693,133 @@
         </div>
     </div>
 
+    <!-- Export Modal -->
+    <div id="export-modal" class="questions-modal">
+        <div class="questions-modal-content" style="max-width: 500px;">
+            <span class="questions-modal-close" onclick="closeExportModal()">&times;</span>
+            <h2>Export to Excel</h2>
+
+            <div style="margin: 20px 0;">
+                <div style="margin-bottom: 15px;">
+                    <label style="display: flex; align-items: center; cursor: pointer; padding: 15px; border: 2px solid #e0e0e0; border-radius: 8px; transition: all 0.3s ease;">
+                        <input type="radio" name="export-type" value="current" checked onchange="toggleCustomExportOptions()" style="margin-right: 12px; width: 18px; height: 18px; cursor: pointer;">
+                        <div>
+                            <div style="font-weight: 600; color: #262262; margin-bottom: 4px;">Export Current Visual</div>
+                            <div style="font-size: 13px; color: #666;">Export data currently displayed on screen</div>
+                        </div>
+                    </label>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="display: flex; align-items: center; cursor: pointer; padding: 15px; border: 2px solid #e0e0e0; border-radius: 8px; transition: all 0.3s ease;">
+                        <input type="radio" name="export-type" value="custom" onchange="toggleCustomExportOptions()" style="margin-right: 12px; width: 18px; height: 18px; cursor: pointer;">
+                        <div>
+                            <div style="font-weight: 600; color: #262262; margin-bottom: 4px;">Custom Export</div>
+                            <div style="font-size: 13px; color: #666;">Select specific series to export</div>
+                        </div>
+                    </label>
+                </div>
+
+                <div id="custom-export-options" style="display: none; margin-top: 20px; padding: 15px; background: #f8f8f8; border-radius: 8px; max-height: 300px; overflow-y: auto;">
+                    <div style="margin-bottom: 10px; font-weight: 600; color: #262262;">Select Series:</div>
+
+                    <div style="margin-bottom: 12px;">
+                        <div style="font-weight: 600; color: #262262; font-size: 13px; margin-bottom: 6px;">Retail Sales Monitor</div>
+                        <label style="display: flex; align-items: center; margin: 4px 0; cursor: pointer;">
+                            <input type="checkbox" value="rsm-total" class="export-series-checkbox" style="margin-right: 8px;">
+                            <span style="font-size: 14px;">Total Sales</span>
+                        </label>
+                        <label style="display: flex; align-items: center; margin: 4px 0; cursor: pointer;">
+                            <input type="checkbox" value="rsm-food" class="export-series-checkbox" style="margin-right: 8px;">
+                            <span style="font-size: 14px;">Food Sales</span>
+                        </label>
+                        <label style="display: flex; align-items: center; margin: 4px 0; cursor: pointer;">
+                            <input type="checkbox" value="rsm-nonfood" class="export-series-checkbox" style="margin-right: 8px;">
+                            <span style="font-size: 14px;">Non-Food Sales</span>
+                        </label>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <div style="font-weight: 600; color: #262262; font-size: 13px; margin-bottom: 6px;">Shop Price Monitor</div>
+                        <label style="display: flex; align-items: center; margin: 4px 0; cursor: pointer;">
+                            <input type="checkbox" value="spm-all" class="export-series-checkbox" style="margin-right: 8px;">
+                            <span style="font-size: 14px;">All Items</span>
+                        </label>
+                        <label style="display: flex; align-items: center; margin: 4px 0; cursor: pointer;">
+                            <input type="checkbox" value="spm-food" class="export-series-checkbox" style="margin-right: 8px;">
+                            <span style="font-size: 14px;">Food Prices</span>
+                        </label>
+                        <label style="display: flex; align-items: center; margin: 4px 0; cursor: pointer;">
+                            <input type="checkbox" value="spm-nonfood" class="export-series-checkbox" style="margin-right: 8px;">
+                            <span style="font-size: 14px;">Non-Food Prices</span>
+                        </label>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <div style="font-weight: 600; color: #262262; font-size: 13px; margin-bottom: 6px;">Consumer Sentiment Monitor</div>
+                        <label style="display: flex; align-items: center; margin: 4px 0; cursor: pointer;">
+                            <input type="checkbox" value="csm-ukeconomy" class="export-series-checkbox" style="margin-right: 8px;">
+                            <span style="font-size: 14px;">UK Economy (Next 3m)</span>
+                        </label>
+                        <label style="display: flex; align-items: center; margin: 4px 0; cursor: pointer;">
+                            <input type="checkbox" value="csm-currentfinance" class="export-series-checkbox" style="margin-right: 8px;">
+                            <span style="font-size: 14px;">Current Financial Situation</span>
+                        </label>
+                        <label style="display: flex; align-items: center; margin: 4px 0; cursor: pointer;">
+                            <input type="checkbox" value="csm-personalfinance" class="export-series-checkbox" style="margin-right: 8px;">
+                            <span style="font-size: 14px;">Expected Financial Situation (Next 3m)</span>
+                        </label>
+                        <label style="display: flex; align-items: center; margin: 4px 0; cursor: pointer;">
+                            <input type="checkbox" value="csm-borrowing" class="export-series-checkbox" style="margin-right: 8px;">
+                            <span style="font-size: 14px;">Borrowing (Next 3m)</span>
+                        </label>
+                        <label style="display: flex; align-items: center; margin: 4px 0; cursor: pointer;">
+                            <input type="checkbox" value="csm-spending" class="export-series-checkbox" style="margin-right: 8px;">
+                            <span style="font-size: 14px;">Spending (Next 3m)</span>
+                        </label>
+                        <label style="display: flex; align-items: center; margin: 4px 0; cursor: pointer;">
+                            <input type="checkbox" value="csm-retailspending" class="export-series-checkbox" style="margin-right: 8px;">
+                            <span style="font-size: 14px;">Retail Spending (Next 3m)</span>
+                        </label>
+                        <label style="display: flex; align-items: center; margin: 4px 0; cursor: pointer;">
+                            <input type="checkbox" value="csm-saving" class="export-series-checkbox" style="margin-right: 8px;">
+                            <span style="font-size: 14px;">Saving (Next 3m)</span>
+                        </label>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <div style="font-weight: 600; color: #262262; font-size: 13px; margin-bottom: 6px;">Footfall Monitor</div>
+                        <label style="display: flex; align-items: center; margin: 4px 0; cursor: pointer;">
+                            <input type="checkbox" value="ffm-total" class="export-series-checkbox" style="margin-right: 8px;">
+                            <span style="font-size: 14px;">Total Retail</span>
+                        </label>
+                        <label style="display: flex; align-items: center; margin: 4px 0; cursor: pointer;">
+                            <input type="checkbox" value="ffm-highstreets" class="export-series-checkbox" style="margin-right: 8px;">
+                            <span style="font-size: 14px;">High Streets</span>
+                        </label>
+                        <label style="display: flex; align-items: center; margin: 4px 0; cursor: pointer;">
+                            <input type="checkbox" value="ffm-retailparks" class="export-series-checkbox" style="margin-right: 8px;">
+                            <span style="font-size: 14px;">Retail Parks</span>
+                        </label>
+                        <label style="display: flex; align-items: center; margin: 4px 0; cursor: pointer;">
+                            <input type="checkbox" value="ffm-shopping" class="export-series-checkbox" style="margin-right: 8px;">
+                            <span style="font-size: 14px;">Shopping Centres</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                <button onclick="closeExportModal()" style="padding: 10px 20px; background: #e0e0e0; color: #262262; border: none; border-radius: 4px; cursor: pointer; font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 500;">
+                    Cancel
+                </button>
+                <button onclick="executeExport()" style="padding: 10px 20px; background: #8CC747; color: white; border: none; border-radius: 4px; cursor: pointer; font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 500;">
+                    Export
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Store all chart data
         var chartData = {
@@ -1616,8 +1743,43 @@
             updateTopDateRange();
         }
 
-        // Excel export function
+        // Export modal functions
         function exportToExcel() {
+            // Open the export modal
+            document.getElementById('export-modal').style.display = 'block';
+        }
+
+        function closeExportModal() {
+            document.getElementById('export-modal').style.display = 'none';
+        }
+
+        function toggleCustomExportOptions() {
+            var customRadio = document.querySelector('input[name="export-type"][value="custom"]');
+            var customOptions = document.getElementById('custom-export-options');
+
+            if (customRadio.checked) {
+                customOptions.style.display = 'block';
+            } else {
+                customOptions.style.display = 'none';
+            }
+        }
+
+        function executeExport() {
+            var exportType = document.querySelector('input[name="export-type"]:checked').value;
+
+            if (exportType === 'current') {
+                // Export current visual
+                exportCurrentVisual();
+            } else {
+                // Export custom selection
+                exportCustomSelection();
+            }
+
+            // Close modal
+            closeExportModal();
+        }
+
+        function exportCurrentVisual() {
             var data, filename;
 
             if (currentTab === 'retail-sales') {
@@ -1712,6 +1874,87 @@
             XLSX.utils.book_append_sheet(wb, ws, "Data");
 
             // Download
+            XLSX.writeFile(wb, filename);
+        }
+
+        function exportCustomSelection() {
+            var checkboxes = document.querySelectorAll('.export-series-checkbox:checked');
+
+            if (checkboxes.length === 0) {
+                alert('Please select at least one series to export');
+                return;
+            }
+
+            var selectedSeries = [];
+            checkboxes.forEach(function(cb) {
+                selectedSeries.push(cb.value);
+            });
+
+            // Build data from selected series
+            var traces = [];
+            var allUniqueDates = new Set();
+
+            selectedSeries.forEach(function(seriesId) {
+                var mapping = seriesMapping[seriesId];
+                var dataset = chartData[mapping.dataset][currentFrequency];
+
+                // Find the trace in the dataset
+                var sourceTrace = dataset.data.find(function(t) {
+                    return t.name === mapping.column;
+                });
+
+                if (sourceTrace) {
+                    traces.push({
+                        name: mapping.label,
+                        x: sourceTrace.x,
+                        y: sourceTrace.y
+                    });
+
+                    // Collect all unique dates
+                    sourceTrace.x.forEach(function(date) {
+                        allUniqueDates.add(date);
+                    });
+                }
+            });
+
+            // Convert set to sorted array
+            var allDatesSorted = Array.from(allUniqueDates).sort(function(a, b) {
+                var aVal = parseDateForSorting(a);
+                var bVal = parseDateForSorting(b);
+                if (aVal < bVal) return -1;
+                if (aVal > bVal) return 1;
+                return 0;
+            });
+
+            // Build worksheet with proper alignment
+            var wsData = [];
+            var headers = ['Date'];
+            traces.forEach(function(trace) {
+                headers.push(trace.name);
+            });
+            wsData.push(headers);
+
+            // For each date, find the corresponding value in each series
+            allDatesSorted.forEach(function(date) {
+                var row = [date];
+                traces.forEach(function(trace) {
+                    var index = trace.x.indexOf(date);
+                    if (index !== -1) {
+                        row.push(trace.y[index]);
+                    } else {
+                        row.push(''); // Empty cell if this series doesn't have data for this date
+                    }
+                });
+                wsData.push(row);
+            });
+
+            // Create workbook
+            var wb = XLSX.utils.book_new();
+            var ws = XLSX.utils.aoa_to_sheet(wsData);
+            XLSX.utils.book_append_sheet(wb, ws, "Data");
+
+            // Download
+            var filename = 'Custom_Export_' + currentFrequency + '.xlsx';
             XLSX.writeFile(wb, filename);
         }
 
