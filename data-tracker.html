@@ -724,7 +724,7 @@
                     <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e0e0e0;">
                         <div style="margin-bottom: 12px;">
                             <label style="display: block; font-weight: 600; color: #262262; font-size: 13px; margin-bottom: 6px;">Frequency:</label>
-                            <select id="export-frequency-select" style="width: 100%; padding: 6px 10px; border: 2px solid #e0e0e0; border-radius: 4px; font-family: 'Lato', sans-serif; font-size: 13px; background: white;">
+                            <select id="export-frequency-select" onchange="updateExportDateInputs()" style="width: 100%; padding: 6px 10px; border: 2px solid #e0e0e0; border-radius: 4px; font-family: 'Lato', sans-serif; font-size: 13px; background: white;">
                                 <option value="monthly">Monthly</option>
                                 <option value="quarterly">Quarterly</option>
                                 <option value="annual">Annual</option>
@@ -732,10 +732,66 @@
                         </div>
                         <div>
                             <label style="display: block; font-weight: 600; color: #262262; font-size: 13px; margin-bottom: 6px;">Date Range:</label>
-                            <div style="display: flex; gap: 8px; align-items: center;">
-                                <input type="text" id="export-date-start" readonly style="flex: 1; padding: 6px 10px; border: 2px solid #e0e0e0; border-radius: 4px; font-family: 'Lato', sans-serif; font-size: 13px; background: white; text-align: center; cursor: default;">
+
+                            <!-- Monthly/Quarterly inputs -->
+                            <div id="export-month-inputs" style="display: flex; gap: 8px; align-items: center;">
+                                <select id="export-start-month" style="flex: 1; padding: 6px 10px; border: 2px solid #e0e0e0; border-radius: 4px; font-family: 'Lato', sans-serif; font-size: 13px; background: white;">
+                                    <option value="01">Jan</option>
+                                    <option value="02">Feb</option>
+                                    <option value="03">Mar</option>
+                                    <option value="04">Apr</option>
+                                    <option value="05">May</option>
+                                    <option value="06">Jun</option>
+                                    <option value="07">Jul</option>
+                                    <option value="08">Aug</option>
+                                    <option value="09">Sep</option>
+                                    <option value="10">Oct</option>
+                                    <option value="11">Nov</option>
+                                    <option value="12">Dec</option>
+                                </select>
+                                <input type="number" id="export-start-year" placeholder="YYYY" min="2000" max="2030" style="flex: 1; padding: 6px 10px; border: 2px solid #e0e0e0; border-radius: 4px; font-family: 'Lato', sans-serif; font-size: 13px;">
                                 <span style="color: #666; font-size: 13px;">to</span>
-                                <input type="text" id="export-date-end" readonly style="flex: 1; padding: 6px 10px; border: 2px solid #e0e0e0; border-radius: 4px; font-family: 'Lato', sans-serif; font-size: 13px; background: white; text-align: center; cursor: default;">
+                                <select id="export-end-month" style="flex: 1; padding: 6px 10px; border: 2px solid #e0e0e0; border-radius: 4px; font-family: 'Lato', sans-serif; font-size: 13px; background: white;">
+                                    <option value="01">Jan</option>
+                                    <option value="02">Feb</option>
+                                    <option value="03">Mar</option>
+                                    <option value="04">Apr</option>
+                                    <option value="05">May</option>
+                                    <option value="06">Jun</option>
+                                    <option value="07">Jul</option>
+                                    <option value="08">Aug</option>
+                                    <option value="09">Sep</option>
+                                    <option value="10">Oct</option>
+                                    <option value="11">Nov</option>
+                                    <option value="12">Dec</option>
+                                </select>
+                                <input type="number" id="export-end-year" placeholder="YYYY" min="2000" max="2030" style="flex: 1; padding: 6px 10px; border: 2px solid #e0e0e0; border-radius: 4px; font-family: 'Lato', sans-serif; font-size: 13px;">
+                            </div>
+
+                            <!-- Quarterly inputs -->
+                            <div id="export-quarter-inputs" style="display: none; gap: 8px; align-items: center;">
+                                <select id="export-start-quarter" style="flex: 1; padding: 6px 10px; border: 2px solid #e0e0e0; border-radius: 4px; font-family: 'Lato', sans-serif; font-size: 13px; background: white;">
+                                    <option value="03">Q1</option>
+                                    <option value="06">Q2</option>
+                                    <option value="09">Q3</option>
+                                    <option value="12">Q4</option>
+                                </select>
+                                <input type="number" id="export-start-year-q" placeholder="YYYY" min="2000" max="2030" style="flex: 1; padding: 6px 10px; border: 2px solid #e0e0e0; border-radius: 4px; font-family: 'Lato', sans-serif; font-size: 13px;">
+                                <span style="color: #666; font-size: 13px;">to</span>
+                                <select id="export-end-quarter" style="flex: 1; padding: 6px 10px; border: 2px solid #e0e0e0; border-radius: 4px; font-family: 'Lato', sans-serif; font-size: 13px; background: white;">
+                                    <option value="03">Q1</option>
+                                    <option value="06">Q2</option>
+                                    <option value="09">Q3</option>
+                                    <option value="12">Q4</option>
+                                </select>
+                                <input type="number" id="export-end-year-q" placeholder="YYYY" min="2000" max="2030" style="flex: 1; padding: 6px 10px; border: 2px solid #e0e0e0; border-radius: 4px; font-family: 'Lato', sans-serif; font-size: 13px;">
+                            </div>
+
+                            <!-- Annual inputs -->
+                            <div id="export-annual-inputs" style="display: none; gap: 8px; align-items: center;">
+                                <input type="number" id="export-start-year-a" placeholder="YYYY" min="2000" max="2030" style="flex: 1; padding: 6px 10px; border: 2px solid #e0e0e0; border-radius: 4px; font-family: 'Lato', sans-serif; font-size: 13px;">
+                                <span style="color: #666; font-size: 13px;">to</span>
+                                <input type="number" id="export-end-year-a" placeholder="YYYY" min="2000" max="2030" style="flex: 1; padding: 6px 10px; border: 2px solid #e0e0e0; border-radius: 4px; font-family: 'Lato', sans-serif; font-size: 13px;">
                             </div>
                         </div>
                     </div>
@@ -1767,21 +1823,57 @@
             // Populate frequency dropdown with current frequency
             document.getElementById('export-frequency-select').value = currentFrequency;
 
-            // Populate date range with current date range
-            if (currentTabDates.length > 0) {
-                var startIndex = Math.floor((currentDateRange.min / 100) * (currentTabDates.length - 1));
-                var endIndex = Math.ceil((currentDateRange.max / 100) * (currentTabDates.length - 1));
-
-                if (endIndex >= currentTabDates.length) {
-                    endIndex = currentTabDates.length - 1;
-                }
-
-                document.getElementById('export-date-start').value = currentTabDates[startIndex] || currentTabDates[0];
-                document.getElementById('export-date-end').value = currentTabDates[endIndex] || currentTabDates[currentTabDates.length - 1];
-            }
+            // Update date inputs based on frequency
+            updateExportDateInputs();
 
             // Open the export modal
             document.getElementById('export-modal').style.display = 'block';
+        }
+
+        function updateExportDateInputs() {
+            var freq = document.getElementById('export-frequency-select').value;
+
+            // Hide all input sets
+            document.getElementById('export-month-inputs').style.display = 'none';
+            document.getElementById('export-quarter-inputs').style.display = 'none';
+            document.getElementById('export-annual-inputs').style.display = 'none';
+
+            if (currentTabDates.length === 0) return;
+
+            var startIndex = Math.floor((currentDateRange.min / 100) * (currentTabDates.length - 1));
+            var endIndex = Math.ceil((currentDateRange.max / 100) * (currentTabDates.length - 1));
+
+            if (endIndex >= currentTabDates.length) {
+                endIndex = currentTabDates.length - 1;
+            }
+
+            var startDate = currentTabDates[startIndex] || currentTabDates[0];
+            var endDate = currentTabDates[endIndex] || currentTabDates[currentTabDates.length - 1];
+
+            if (freq === 'monthly') {
+                document.getElementById('export-month-inputs').style.display = 'flex';
+                // Parse YYYY-MM format
+                var startParts = startDate.split('-');
+                var endParts = endDate.split('-');
+                document.getElementById('export-start-month').value = startParts[1] || '01';
+                document.getElementById('export-start-year').value = startParts[0] || '';
+                document.getElementById('export-end-month').value = endParts[1] || '12';
+                document.getElementById('export-end-year').value = endParts[0] || '';
+            } else if (freq === 'quarterly') {
+                document.getElementById('export-quarter-inputs').style.display = 'flex';
+                // Parse YYYY-MM format and convert to quarter
+                var startParts = startDate.split('-');
+                var endParts = endDate.split('-');
+                document.getElementById('export-start-quarter').value = startParts[1] || '03';
+                document.getElementById('export-start-year-q').value = startParts[0] || '';
+                document.getElementById('export-end-quarter').value = endParts[1] || '12';
+                document.getElementById('export-end-year-q').value = endParts[0] || '';
+            } else if (freq === 'annual') {
+                document.getElementById('export-annual-inputs').style.display = 'flex';
+                // Parse YYYY format
+                document.getElementById('export-start-year-a').value = startDate;
+                document.getElementById('export-end-year-a').value = endDate;
+            }
         }
 
         function closeExportModal() {
@@ -1922,8 +2014,28 @@
 
             // Get selected frequency from the export modal
             var exportFrequency = document.getElementById('export-frequency-select').value;
-            var exportStartDate = document.getElementById('export-date-start').value;
-            var exportEndDate = document.getElementById('export-date-end').value;
+
+            // Build start and end dates based on frequency
+            var exportStartDate, exportEndDate;
+
+            if (exportFrequency === 'monthly') {
+                var startMonth = document.getElementById('export-start-month').value;
+                var startYear = document.getElementById('export-start-year').value;
+                var endMonth = document.getElementById('export-end-month').value;
+                var endYear = document.getElementById('export-end-year').value;
+                exportStartDate = startYear + '-' + startMonth;
+                exportEndDate = endYear + '-' + endMonth;
+            } else if (exportFrequency === 'quarterly') {
+                var startQuarter = document.getElementById('export-start-quarter').value;
+                var startYear = document.getElementById('export-start-year-q').value;
+                var endQuarter = document.getElementById('export-end-quarter').value;
+                var endYear = document.getElementById('export-end-year-q').value;
+                exportStartDate = startYear + '-' + startQuarter;
+                exportEndDate = endYear + '-' + endQuarter;
+            } else if (exportFrequency === 'annual') {
+                exportStartDate = document.getElementById('export-start-year-a').value;
+                exportEndDate = document.getElementById('export-end-year-a').value;
+            }
 
             var selectedSeries = [];
             checkboxes.forEach(function(cb) {
