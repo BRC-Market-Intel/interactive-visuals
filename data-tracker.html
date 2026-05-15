@@ -17,11 +17,20 @@
             font-family: 'Lato', sans-serif;
             background: white;
             overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .tab-container {
             width: 100%;
             max-width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
         }
 
         .frequency-selector {
@@ -268,7 +277,8 @@
             display: flex;
             gap: 20px;
             padding: 0;
-            height: 550px;
+            flex: 1;
+            min-height: 0;
         }
 
         .series-selector {
@@ -437,25 +447,25 @@
             width: 100%;
             background: white;
             display: none;
+            flex: 1;
+            flex-direction: column;
+            min-height: 0;
         }
 
         .tab-content.active {
-            display: block;
+            display: flex;
         }
 
         .chart-container {
             width: 100%;
-            height: 550px;
+            flex: 1;
+            min-height: 0;
         }
 
         @media (max-width: 768px) {
             .frequency-selector {
                 flex-wrap: wrap;
                 gap: 10px;
-            }
-
-            .chart-container {
-                height: 450px;
             }
         }
     </style>
