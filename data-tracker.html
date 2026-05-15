@@ -720,7 +720,26 @@
                     </label>
                 </div>
 
-                <div id="custom-export-options" style="display: none; margin-top: 20px; padding: 15px; background: #f8f8f8; border-radius: 8px; max-height: 300px; overflow-y: auto;">
+                <div id="custom-export-options" style="display: none; margin-top: 20px; padding: 15px; background: #f8f8f8; border-radius: 8px; max-height: 400px; overflow-y: auto;">
+                    <div style="display: flex; gap: 15px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e0e0e0;">
+                        <div style="flex: 1;">
+                            <label style="display: block; font-weight: 600; color: #262262; font-size: 13px; margin-bottom: 6px;">Frequency:</label>
+                            <select id="export-frequency-select" style="width: 100%; padding: 6px 10px; border: 2px solid #e0e0e0; border-radius: 4px; font-family: 'Lato', sans-serif; font-size: 13px; background: white;">
+                                <option value="monthly">Monthly</option>
+                                <option value="quarterly">Quarterly</option>
+                                <option value="annual">Annual</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1;">
+                            <label style="display: block; font-weight: 600; color: #262262; font-size: 13px; margin-bottom: 6px;">Date Range:</label>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <input type="text" id="export-date-start" readonly style="flex: 1; padding: 6px 10px; border: 2px solid #e0e0e0; border-radius: 4px; font-family: 'Lato', sans-serif; font-size: 13px; background: white; text-align: center; cursor: default;">
+                                <span style="color: #666;">to</span>
+                                <input type="text" id="export-date-end" readonly style="flex: 1; padding: 6px 10px; border: 2px solid #e0e0e0; border-radius: 4px; font-family: 'Lato', sans-serif; font-size: 13px; background: white; text-align: center; cursor: default;">
+                            </div>
+                        </div>
+                    </div>
+
                     <div style="margin-bottom: 10px; font-weight: 600; color: #262262;">Select Series:</div>
 
                     <div style="margin-bottom: 12px;">
@@ -1745,6 +1764,22 @@
 
         // Export modal functions
         function exportToExcel() {
+            // Populate frequency dropdown with current frequency
+            document.getElementById('export-frequency-select').value = currentFrequency;
+
+            // Populate date range with current date range
+            if (currentTabDates.length > 0) {
+                var startIndex = Math.floor((currentDateRange.min / 100) * (currentTabDates.length - 1));
+                var endIndex = Math.ceil((currentDateRange.max / 100) * (currentTabDates.length - 1));
+
+                if (endIndex >= currentTabDates.length) {
+                    endIndex = currentTabDates.length - 1;
+                }
+
+                document.getElementById('export-date-start').value = currentTabDates[startIndex] || currentTabDates[0];
+                document.getElementById('export-date-end').value = currentTabDates[endIndex] || currentTabDates[currentTabDates.length - 1];
+            }
+
             // Open the export modal
             document.getElementById('export-modal').style.display = 'block';
         }
@@ -1885,18 +1920,23 @@
                 return;
             }
 
+            // Get selected frequency from the export modal
+            var exportFrequency = document.getElementById('export-frequency-select').value;
+            var exportStartDate = document.getElementById('export-date-start').value;
+            var exportEndDate = document.getElementById('export-date-end').value;
+
             var selectedSeries = [];
             checkboxes.forEach(function(cb) {
                 selectedSeries.push(cb.value);
             });
 
-            // Build data from selected series
+            // Build data from selected series using the export frequency
             var traces = [];
             var allUniqueDates = new Set();
 
             selectedSeries.forEach(function(seriesId) {
                 var mapping = seriesMapping[seriesId];
-                var dataset = chartData[mapping.dataset][currentFrequency];
+                var dataset = chartData[mapping.dataset][exportFrequency];
 
                 // Find the trace in the dataset
                 var sourceTrace = dataset.data.find(function(t) {
@@ -1904,15 +1944,22 @@
                 });
 
                 if (sourceTrace) {
+                    // Filter by date range
+                    var filteredX = [];
+                    var filteredY = [];
+
+                    for (var i = 0; i < sourceTrace.x.length; i++) {
+                        if (sourceTrace.x[i] >= exportStartDate && sourceTrace.x[i] <= exportEndDate) {
+                            filteredX.push(sourceTrace.x[i]);
+                            filteredY.push(sourceTrace.y[i]);
+                            allUniqueDates.add(sourceTrace.x[i]);
+                        }
+                    }
+
                     traces.push({
                         name: mapping.label,
-                        x: sourceTrace.x,
-                        y: sourceTrace.y
-                    });
-
-                    // Collect all unique dates
-                    sourceTrace.x.forEach(function(date) {
-                        allUniqueDates.add(date);
+                        x: filteredX,
+                        y: filteredY
                     });
                 }
             });
@@ -1954,7 +2001,7 @@
             XLSX.utils.book_append_sheet(wb, ws, "Data");
 
             // Download
-            var filename = 'Custom_Export_' + currentFrequency + '.xlsx';
+            var filename = 'Custom_Export_' + exportFrequency + '.xlsx';
             XLSX.writeFile(wb, filename);
         }
 
