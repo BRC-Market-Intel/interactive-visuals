@@ -527,7 +527,7 @@
             <button class="view-questions-button" id="view-questions-btn" onclick="openQuestionsModal()">
                 <span style="margin-right: 5px;">ℹ️</span> Sentiment Qs
             </button>
-            <button class="export-button" onclick="exportToExcel()">Export to Excel</button>
+            <button class="export-button" onclick="exportToExcel()">Export</button>
         </div>
 
         <div id="retail-sales" class="tab-content active">
@@ -721,8 +721,8 @@
                 </div>
 
                 <div id="custom-export-options" style="display: none; margin-top: 20px; padding: 15px; background: #f8f8f8; border-radius: 8px; max-height: 400px; overflow-y: auto;">
-                    <div style="display: flex; gap: 15px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e0e0e0;">
-                        <div style="flex: 1;">
+                    <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e0e0e0;">
+                        <div style="margin-bottom: 12px;">
                             <label style="display: block; font-weight: 600; color: #262262; font-size: 13px; margin-bottom: 6px;">Frequency:</label>
                             <select id="export-frequency-select" style="width: 100%; padding: 6px 10px; border: 2px solid #e0e0e0; border-radius: 4px; font-family: 'Lato', sans-serif; font-size: 13px; background: white;">
                                 <option value="monthly">Monthly</option>
@@ -730,11 +730,11 @@
                                 <option value="annual">Annual</option>
                             </select>
                         </div>
-                        <div style="flex: 1;">
+                        <div>
                             <label style="display: block; font-weight: 600; color: #262262; font-size: 13px; margin-bottom: 6px;">Date Range:</label>
                             <div style="display: flex; gap: 8px; align-items: center;">
                                 <input type="text" id="export-date-start" readonly style="flex: 1; padding: 6px 10px; border: 2px solid #e0e0e0; border-radius: 4px; font-family: 'Lato', sans-serif; font-size: 13px; background: white; text-align: center; cursor: default;">
-                                <span style="color: #666;">to</span>
+                                <span style="color: #666; font-size: 13px;">to</span>
                                 <input type="text" id="export-date-end" readonly style="flex: 1; padding: 6px 10px; border: 2px solid #e0e0e0; border-radius: 4px; font-family: 'Lato', sans-serif; font-size: 13px; background: white; text-align: center; cursor: default;">
                             </div>
                         </div>
