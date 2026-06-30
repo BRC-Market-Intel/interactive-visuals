@@ -14,21 +14,21 @@
   --green:#8CC747;--purple:#92278F;--font:'Lato',sans-serif;
   --muted:#777;--border:#dde1e7;--bg:#f4f6f9}
 body{font-family:var(--font);background:var(--bg);color:#222;line-height:1.4}
-.rin-shell{max-width:1280px;margin:0 auto}
-.rin-header{background:var(--navy);color:#fff;padding:32px 24px 0}
-.rin-header-inner{max-width:1232px;margin:0 auto}
+.rin-shell{max-width:920px;margin:0 auto}
+.rin-header{background:var(--navy);color:#fff;padding:32px 4px 0}
+.rin-header-inner{max-width:872px;margin:0 auto}
 .rin-eyebrow{font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;opacity:.6}
 .rin-header h1{font-size:32px;font-weight:900;margin-top:6px}
 .rin-subtitle{font-size:14px;opacity:.75;margin-top:4px;margin-bottom:24px}
-.rin-nav{display:flex;gap:4px;max-width:1232px;margin:0 auto;overflow-x:auto}
+.rin-nav{display:flex;gap:4px;max-width:872px;margin:0 auto;overflow-x:auto}
 .rin-nav-link{color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;font-weight:700;
   padding:10px 16px;border-bottom:3px solid transparent;white-space:nowrap;transition:all .15s}
 .rin-nav-link:hover{color:#fff;border-bottom-color:var(--theme-color)}
-.rin-main{padding:28px 24px 8px}
+.rin-main{padding:28px 4px 8px}
 .rin-theme{margin-bottom:36px;scroll-margin-top:16px}
 .rin-theme-hdr{border-left:5px solid var(--theme-color);padding-left:12px;margin-bottom:14px}
 .rin-theme-hdr h2{font-size:20px;font-weight:900;color:var(--navy)}
-.rin-card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.rin-card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
 .rin-card{background:#fff;border-radius:8px;border:1px solid var(--border);
   padding:16px 18px 14px;box-shadow:0 1px 4px rgba(38,34,98,.06);
   transition:box-shadow .15s;display:flex;flex-direction:column;gap:4px}
@@ -54,7 +54,7 @@ body{font-family:var(--font);background:var(--bg);color:#222;line-height:1.4}
   cursor:pointer;background:none;border:none;font-family:var(--font);padding:0;
   text-align:left;text-decoration:underline}
 .rin-card-ts-btn:hover,.rin-card-toggle-btn:hover{color:var(--navy)}
-.rin-footer{padding:20px 24px 36px;font-size:11px;color:var(--muted);text-align:center}
+.rin-footer{padding:20px 4px 36px;font-size:11px;color:var(--muted);text-align:center}
 .rin-modal-overlay{display:none;position:fixed;inset:0;background:rgba(38,34,98,.55);
   z-index:999;align-items:center;justify-content:center;padding:20px}
 .rin-modal-overlay.on{display:flex}
@@ -74,9 +74,6 @@ body{font-family:var(--font);background:var(--bg);color:#222;line-height:1.4}
 .rin-variant-pill:hover{border-color:var(--navy)}
 .rin-variant-pill.on{background:var(--navy);color:#fff;border-color:var(--navy)}
 .rin-modal-chart{height:460px;padding:8px 12px 12px}
-@media(max-width:880px){
-  .rin-card-grid{grid-template-columns:1fr 1fr}
-}
 @media(max-width:640px){
   .rin-header h1{font-size:24px}
   .rin-card-grid{grid-template-columns:1fr}
