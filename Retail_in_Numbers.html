@@ -73,7 +73,7 @@ body{font-family:var(--font);background:var(--bg);color:#222;line-height:1.4}
   cursor:pointer;transition:all .13s}
 .rin-variant-pill:hover{border-color:var(--navy)}
 .rin-variant-pill.on{background:var(--navy);color:#fff;border-color:var(--navy)}
-.rin-modal-chart{height:460px;padding:8px 12px 12px}
+.rin-modal-chart{flex:1 1 auto;min-height:260px;padding:8px 12px 12px}
 @media(max-width:640px){
   .rin-header h1{font-size:24px}
   .rin-card-grid{grid-template-columns:1fr}
@@ -649,6 +649,12 @@ function rinToggleCard(btn, themeKey, cardKey){
 }
 document.addEventListener('keydown', function(e){
   if(e.key === 'Escape') rinCloseModal();
+});
+window.addEventListener('resize', function(){
+  var overlay = document.getElementById('rin-modal-overlay');
+  if(overlay && overlay.classList.contains('on')){
+    Plotly.Plots.resize('rin-modal-chart');
+  }
 });
 
 </script>
