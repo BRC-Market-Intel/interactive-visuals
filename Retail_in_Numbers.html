@@ -58,7 +58,7 @@ body{font-family:var(--font);background:var(--bg);color:#222;line-height:1.4}
 .rin-modal-overlay{display:none;position:fixed;inset:0;background:rgba(38,34,98,.55);
   z-index:999;align-items:center;justify-content:center;padding:20px}
 .rin-modal-overlay.on{display:flex}
-.rin-modal{background:#fff;border-radius:10px;width:100%;max-width:760px;max-height:88vh;
+.rin-modal{background:#fff;border-radius:10px;width:100%;max-width:920px;max-height:88vh;
   display:flex;flex-direction:column;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.25)}
 .rin-modal-hdr{display:flex;justify-content:space-between;align-items:flex-start;
   padding:18px 22px;border-bottom:2px solid var(--grey)}
@@ -73,7 +73,7 @@ body{font-family:var(--font);background:var(--bg);color:#222;line-height:1.4}
   cursor:pointer;transition:all .13s}
 .rin-variant-pill:hover{border-color:var(--navy)}
 .rin-variant-pill.on{background:var(--navy);color:#fff;border-color:var(--navy)}
-.rin-modal-chart{height:380px;padding:8px 16px 16px}
+.rin-modal-chart{height:460px;padding:8px 12px 12px}
 @media(max-width:880px){
   .rin-card-grid{grid-template-columns:1fr 1fr}
 }
@@ -624,10 +624,11 @@ function rinRenderModalChart(themeKey, cardKey, useToggle){
   Plotly.newPlot('rin-modal-chart', traces, {
     font:{family:'Lato,sans-serif', size:13, color:'#444'},
     paper_bgcolor:'transparent', plot_bgcolor:'transparent',
-    margin:{t:20, r:20, b:40, l:55},
+    margin:{t:20, r:24, b:55, l:60},
     showlegend: traces.length>1,
     legend:{orientation:'h', y:1.12, font:{size:11}},
-    xaxis:{gridcolor:'#eee', tickfont:{size:11}, type:'category', range:xRange, showgrid:false},
+    xaxis:{gridcolor:'#eee', tickfont:{size:11}, type:'category', range:xRange, showgrid:false,
+           nticks: Math.min(ts.periods.length, 16)},
     yaxis:{gridcolor:'#eee', tickfont:{size:11}, ticksuffix: rinUnitSuffix(seriesUnit),
            rangemode: useBar ? 'tozero' : 'normal',
            autorange: true},
