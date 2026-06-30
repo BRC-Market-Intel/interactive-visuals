@@ -73,7 +73,7 @@ body{font-family:var(--font);background:var(--bg);color:#222;line-height:1.4}
   cursor:pointer;transition:all .13s}
 .rin-variant-pill:hover{border-color:var(--navy)}
 .rin-variant-pill.on{background:var(--navy);color:#fff;border-color:var(--navy)}
-.rin-modal-chart{flex:1;min-height:340px;padding:8px 16px 16px}
+.rin-modal-chart{height:380px;padding:8px 16px 16px}
 @media(max-width:880px){
   .rin-card-grid{grid-template-columns:1fr 1fr}
 }
@@ -613,17 +613,29 @@ function rinRenderModalChart(themeKey, cardKey, useToggle){
     });
   }
 
+  var xPad = useBar ? 0.6 : 0.4;
+  var xRange = [-xPad, ts.periods.length - 1 + xPad];
+
+  // Purge before each render (not just on close): reusing the div across
+  // variant switches with a different trace count/shape can otherwise
+  // leave stale internal Plotly sizing state behind, which is what was
+  // causing the chart to grow and overflow the modal after switching pills.
+  Plotly.purge('rin-modal-chart');
   Plotly.newPlot('rin-modal-chart', traces, {
     font:{family:'Lato,sans-serif', size:13, color:'#444'},
     paper_bgcolor:'transparent', plot_bgcolor:'transparent',
     margin:{t:20, r:20, b:40, l:55},
     showlegend: traces.length>1,
     legend:{orientation:'h', y:1.12, font:{size:11}},
-    xaxis:{gridcolor:'#eee', tickfont:{size:11}},
-    yaxis:{gridcolor:'#eee', tickfont:{size:11}, ticksuffix: rinUnitSuffix(seriesUnit)},
+    xaxis:{gridcolor:'#eee', tickfont:{size:11}, type:'category', range:xRange, showgrid:false},
+    yaxis:{gridcolor:'#eee', tickfont:{size:11}, ticksuffix: rinUnitSuffix(seriesUnit),
+           rangemode: useBar ? 'tozero' : 'normal',
+           autorange: true},
     hovermode:'x unified',
     hoverlabel:{bgcolor:'white', bordercolor:'#ccc', font:{family:'Lato,sans-serif', size:12}}
-  }, {responsive:true, displayModeBar:false});
+  }, {responsive:true, displayModeBar:false}).then(function(){
+    Plotly.Plots.resize('rin-modal-chart');
+  });
 }
 
 function rinCloseModal(){
