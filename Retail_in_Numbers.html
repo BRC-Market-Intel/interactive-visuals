@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retail in Numbers | British Retail Consortium</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
+<style>
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#262262;--teal:#00BBCE;--orange:#F37021;--grey:#E6E7E8;
+  --green:#8CC747;--purple:#92278F;--font:'Lato',sans-serif;
+  --muted:#777;--border:#dde1e7;--bg:#f4f6f9}
+body{font-family:var(--font);background:var(--bg);color:#222;line-height:1.4}
+.rin-shell{max-width:1280px;margin:0 auto}
+.rin-header{background:var(--navy);color:#fff;padding:32px 24px 0}
+.rin-header-inner{max-width:1232px;margin:0 auto}
+.rin-eyebrow{font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;opacity:.6}
+.rin-header h1{font-size:32px;font-weight:900;margin-top:6px}
+.rin-subtitle{font-size:14px;opacity:.75;margin-top:4px;margin-bottom:24px}
+.rin-nav{display:flex;gap:4px;max-width:1232px;margin:0 auto;overflow-x:auto}
+.rin-nav-link{color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;font-weight:700;
+  padding:10px 16px;border-bottom:3px solid transparent;white-space:nowrap;transition:all .15s}
+.rin-nav-link:hover{color:#fff;border-bottom-color:var(--theme-color)}
+.rin-main{padding:28px 24px 8px}
+.rin-theme{margin-bottom:36px;scroll-margin-top:16px}
+.rin-theme-hdr{border-left:5px solid var(--theme-color);padding-left:12px;margin-bottom:14px}
+.rin-theme-hdr h2{font-size:20px;font-weight:900;color:var(--navy)}
+.rin-card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.rin-card{background:#fff;border-radius:8px;border:1px solid var(--border);
+  padding:16px 18px 14px;box-shadow:0 1px 4px rgba(38,34,98,.06);
+  transition:box-shadow .15s;display:flex;flex-direction:column;gap:4px}
+.rin-card:hover{box-shadow:0 3px 12px rgba(38,34,98,.12)}
+.rin-card-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted)}
+.rin-card-period-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.rin-card-period{font-size:11.5px;color:var(--muted)}
+.rin-card-spark{flex-shrink:0;line-height:0}
+.rin-trend-arrow{font-size:13px;font-weight:900;margin-right:2px}
+.rin-trend-good{color:#2d9e2d}
+.rin-trend-bad{color:#e03030}
+.rin-trend-flat{color:#999}
+.rin-card-val-row{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:2px}
+.rin-card-val{font-size:26px;font-weight:900;color:var(--navy);line-height:1.1}
+.rin-card-secondary{font-size:14px;font-weight:700;color:var(--muted)}
+.rin-card-note{font-size:11px;font-style:italic;color:var(--muted);margin-top:2px}
+.rin-card-comparator{display:flex;flex-direction:column;gap:0;margin-top:4px;font-size:12px}
+.rin-card-comparator-label{color:var(--muted)}
+.rin-card-comparator-val{font-weight:700;color:var(--navy)}
+.rin-card-desc{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.35}
+.rin-card-actions{display:flex;flex-direction:column;align-items:flex-start;gap:4px;margin-top:10px}
+.rin-card-ts-btn,.rin-card-toggle-btn{font-size:11.5px;font-weight:700;color:var(--teal);
+  cursor:pointer;background:none;border:none;font-family:var(--font);padding:0;
+  text-align:left;text-decoration:underline}
+.rin-card-ts-btn:hover,.rin-card-toggle-btn:hover{color:var(--navy)}
+.rin-footer{padding:20px 24px 36px;font-size:11px;color:var(--muted);text-align:center}
+.rin-modal-overlay{display:none;position:fixed;inset:0;background:rgba(38,34,98,.55);
+  z-index:999;align-items:center;justify-content:center;padding:20px}
+.rin-modal-overlay.on{display:flex}
+.rin-modal{background:#fff;border-radius:10px;width:100%;max-width:760px;max-height:88vh;
+  display:flex;flex-direction:column;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+.rin-modal-hdr{display:flex;justify-content:space-between;align-items:flex-start;
+  padding:18px 22px;border-bottom:2px solid var(--grey)}
+.rin-modal-title{font-size:18px;font-weight:900;color:var(--navy)}
+.rin-modal-sub{font-size:12.5px;color:var(--muted);margin-top:3px}
+.rin-modal-close{background:none;border:none;font-size:26px;line-height:1;color:var(--muted);
+  cursor:pointer;padding:0 4px}
+.rin-modal-close:hover{color:var(--navy)}
+.rin-modal-variants{display:flex;gap:6px;padding:10px 22px 0}
+.rin-variant-pill{padding:4px 12px;border-radius:14px;border:1.5px solid var(--border);
+  background:#f4f6f9;color:var(--navy);font-family:var(--font);font-size:12px;font-weight:700;
+  cursor:pointer;transition:all .13s}
+.rin-variant-pill:hover{border-color:var(--navy)}
+.rin-variant-pill.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.rin-modal-chart{flex:1;min-height:340px;padding:8px 16px 16px}
+@media(max-width:880px){
+  .rin-card-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:640px){
+  .rin-header h1{font-size:24px}
+  .rin-card-grid{grid-template-columns:1fr}
+  .rin-card-val{font-size:21px}
+}
+
+</style>
+</head>
+<body>
+<div class="rin-shell">
+  <header class="rin-header">
+    <div class="rin-header-inner">
+      <div class="rin-eyebrow">British Retail Consortium</div>
+      <h1>Retail in Numbers</h1>
+      <p class="rin-subtitle">The UK retail industry, at a glance.</p>
+    </div>
+    <nav class="rin-nav"><a href="#theme-industry_size" class="rin-nav-link" style="--theme-color:#00BBCE">Industry Size</a>
+<a href="#theme-employment" class="rin-nav-link" style="--theme-color:#F37021">Employment</a>
+<a href="#theme-tax" class="rin-nav-link" style="--theme-color:#92278F">Tax</a>
+<a href="#theme-business_demographics" class="rin-nav-link" style="--theme-color:#8CC747">Business Demographics</a></nav>
+  </header>
+  <main class="rin-main">
+    <section class="rin-theme" id="theme-industry_size">
+  <div class="rin-theme-hdr" style="--theme-color:#00BBCE">
+    <h2>Industry Size</h2>
+  </div>
+  <div class="rin-card-grid">
+    <div class="rin-card" data-theme="industry_size" data-card="sales_value">
+  <div class="rin-card-label">Total Sales in Value Terms</div>
+  <div class="rin-card-period-row">
+    <div class="rin-card-period">2025</div>
+    <div class="rin-card-spark"><svg width="68" height="30" viewBox="0 0 68 30" xmlns="http://www.w3.org/2000/svg" style="overflow:visible"><path d="M3.0,27.0L4.6,26.6L6.2,25.9L7.8,25.3L9.4,24.6L10.9,24.1L12.5,24.0L14.1,23.6L15.7,23.1L17.3,22.8L18.9,22.0L20.5,21.6L22.1,21.2L23.7,20.8L25.3,20.4L26.8,19.7L28.4,18.7L30.0,18.7L31.6,18.0L33.2,17.8L34.8,17.4L36.4,16.9L38.0,16.0L39.6,16.0L41.2,15.5L42.7,14.9L44.3,14.4L45.9,13.7L47.5,12.5L49.1,12.6L50.7,11.8L52.3,10.9L53.9,10.0L55.5,9.1L57.1,8.6L58.6,7.4L60.2,6.2L61.8,4.9L63.4,4.5L65.0,3.0" fill="none" stroke="#2d9e2d" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
+  </div>
+  <div class="rin-card-val-row">
+    <div class="rin-card-val">£491.08bn</div>
+    <span class="rin-trend-arrow rin-trend-good">▲</span>
+    
+  </div>
+  
+  <div class="rin-card-comparator"><span class="rin-card-comparator-label">Avg. annual growth (1986-2025)</span><span class="rin-card-comparator-val">3.9% CAGR</span></div>
+  <div class="rin-card-desc">Non-seasonally adjusted, ex. automotive fuel, current prices</div>
+  <div class="rin-card-actions">
+    
+    <button class="rin-card-ts-btn" onclick="rinOpenTimeSeries('industry_size','sales_value')">View time series →</button>
+  </div>
+</div>
+<div class="rin-card" data-theme="industry_size" data-card="sales_volume">
+  <div class="rin-card-label">Total Sales in Volume Terms</div>
+  <div class="rin-card-period-row">
+    <div class="rin-card-period">2025</div>
+    <div class="rin-card-spark"><svg width="68" height="30" viewBox="0 0 68 30" xmlns="http://www.w3.org/2000/svg" style="overflow:visible"><path d="M3.0,27.0L5.0,26.9L7.0,25.6L9.0,25.0L11.0,24.4L13.0,23.7L15.0,22.5L17.0,19.6L19.0,16.9L21.0,16.9L23.0,15.2L25.0,15.0L27.0,14.4L29.0,13.6L31.0,13.0L33.0,13.7L35.0,13.9L37.0,14.3L39.0,14.1L41.0,13.5L43.0,11.2L45.0,10.4L47.0,8.5L49.0,7.7L51.0,6.7L53.0,5.5L55.0,4.0L57.0,3.0L59.0,5.3L61.0,6.7L63.0,6.8L65.0,5.1" fill="none" stroke="#2d9e2d" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
+  </div>
+  <div class="rin-card-val-row">
+    <div class="rin-card-val">£477.87bn</div>
+    <span class="rin-trend-arrow rin-trend-good">▲</span>
+    
+  </div>
+  
+  <div class="rin-card-comparator"><span class="rin-card-comparator-label">Avg. annual growth (1994-2025)</span><span class="rin-card-comparator-val">2.0% CAGR</span></div>
+  <div class="rin-card-desc">Seasonally adjusted, ex. automotive fuel, chained volume measures</div>
+  <div class="rin-card-actions">
+    
+    <button class="rin-card-ts-btn" onclick="rinOpenTimeSeries('industry_size','sales_volume')">View time series →</button>
+  </div>
+</div>
+<div class="rin-card" data-theme="industry_size" data-card="gva">
+  <div class="rin-card-label">Gross Value Added (GVA)</div>
+  <div class="rin-card-period-row">
+    <div class="rin-card-period">2025</div>
+    <div class="rin-card-spark"><svg width="68" height="30" viewBox="0 0 68 30" xmlns="http://www.w3.org/2000/svg" style="overflow:visible"><path d="M3.0,25.9L4.8,27.0L6.5,24.8L8.3,20.8L10.1,18.1L11.9,17.1L13.6,15.0L15.4,13.2L17.2,12.4L18.9,12.6L20.7,8.7L22.5,8.3L24.3,7.2L26.0,9.9L27.8,7.9L29.6,7.0L31.3,5.3L33.1,5.2L34.9,7.9L36.7,15.7L38.4,11.7L40.2,11.2L42.0,11.8L43.7,12.2L45.5,9.0L47.3,7.1L49.1,5.0L50.8,3.1L52.6,3.0L54.4,3.4L56.1,12.6L57.9,7.3L59.7,9.3L61.5,12.9L63.2,13.2L65.0,12.4" fill="none" stroke="#e03030" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
+  </div>
+  <div class="rin-card-val-row">
+    <div class="rin-card-val">£113.91bn</div>
+    <span class="rin-trend-arrow rin-trend-bad">▼</span>
+    <div class="rin-card-secondary">4.5% of UK GVA</div>
+  </div>
+  
+  <div class="rin-card-comparator"><span class="rin-card-comparator-label">Avg. annual growth (1990-2025)</span><span class="rin-card-comparator-val">0.7% CAGR</span></div>
+  <div class="rin-card-desc">Retail trade (ex. wholesale), chained volume measures, UK</div>
+  <div class="rin-card-actions">
+    
+    <button class="rin-card-ts-btn" onclick="rinOpenTimeSeries('industry_size','gva')">View time series →</button>
+  </div>
+</div>
+<div class="rin-card" data-theme="industry_size" data-card="online_share">
+  <div class="rin-card-label">Online Sales % of Total Retail</div>
+  <div class="rin-card-period-row">
+    <div class="rin-card-period">2026-05</div>
+    <div class="rin-card-spark"><svg width="68" height="30" viewBox="0 0 68 30" xmlns="http://www.w3.org/2000/svg" style="overflow:visible"><path d="M3.0,27.0L3.3,26.9L3.6,26.8L3.8,26.6L4.1,26.7L4.4,26.4L4.7,26.5L5.0,26.3L5.3,26.2L5.5,26.2L5.8,26.1L6.1,25.8L6.4,25.9L6.7,25.8L6.9,25.8L7.2,25.7L7.5,25.7L7.8,25.7L8.1,25.5L8.4,25.5L8.6,25.5L8.9,25.2L9.2,25.0L9.5,25.3L9.8,25.2L10.0,25.2L10.3,25.3L10.6,25.1L10.9,25.0L11.2,25.0L11.5,24.7L11.7,24.5L12.0,24.5L12.3,24.3L12.6,24.2L12.9,24.3L13.1,24.1L13.4,24.3L13.7,24.3L14.0,24.5L14.3,24.3L14.6,24.1L14.8,24.0L15.1,23.9L15.4,23.8L15.7,23.9L16.0,23.5L16.2,23.7L16.5,23.5L16.8,23.4L17.1,23.6L17.4,23.3L17.7,23.1L17.9,23.4L18.2,23.0L18.5,23.6L18.8,23.3L19.1,23.3L19.3,23.3L19.6,22.8L19.9,22.8L20.2,22.7L20.5,22.3L20.8,22.6L21.0,22.6L21.3,22.5L21.6,22.6L21.9,22.3L22.2,22.3L22.4,22.3L22.7,22.3L23.0,22.5L23.3,22.3L23.6,22.1L23.9,22.1L24.1,22.0L24.4,21.7L24.7,21.8L25.0,21.8L25.3,21.7L25.5,21.8L25.8,21.6L26.1,21.6L26.4,21.5L26.7,21.0L27.0,21.4L27.2,21.3L27.5,21.0L27.8,21.2L28.1,21.0L28.4,20.9L28.6,21.0L28.9,20.8L29.2,20.7L29.5,20.5L29.8,20.5L30.1,20.0L30.3,20.4L30.6,20.2L30.9,19.9L31.2,19.7L31.5,19.4L31.7,19.6L32.0,19.3L32.3,18.8L32.6,18.6L32.9,18.4L33.2,18.3L33.4,18.6L33.7,18.6L34.0,18.4L34.3,18.5L34.6,18.5L34.8,18.1L35.1,18.1L35.4,18.0L35.7,17.8L36.0,18.0L36.3,17.8L36.5,17.8L36.8,17.6L37.1,17.5L37.4,17.0L37.7,17.2L37.9,16.9L38.2,16.8L38.5,16.9L38.8,17.0L39.1,16.9L39.4,16.8L39.6,16.7L39.9,16.5L40.2,16.6L40.5,16.4L40.8,16.0L41.0,16.2L41.3,16.1L41.6,16.3L41.9,15.8L42.2,15.9L42.5,16.2L42.7,16.0L43.0,16.0L43.3,15.9L43.6,15.9L43.9,15.9L44.1,13.3L44.4,6.8L44.7,5.0L45.0,6.3L45.3,8.5L45.6,9.0L45.8,9.5L46.1,8.6L46.4,6.6L46.7,8.6L47.0,3.7L47.2,3.0L47.5,4.0L47.8,7.8L48.1,8.7L48.4,9.1L48.7,9.1L48.9,8.8L49.2,8.7L49.5,9.1L49.8,9.5L50.1,9.3L50.3,9.3L50.6,9.7L50.9,10.6L51.2,10.2L51.5,10.6L51.8,11.0L52.0,11.4L52.3,11.2L52.6,11.1L52.9,11.1L53.2,11.2L53.4,11.1L53.7,11.0L54.0,11.1L54.3,10.8L54.6,10.7L54.9,10.6L55.1,10.8L55.4,10.3L55.7,10.5L56.0,10.6L56.3,10.7L56.5,10.3L56.8,10.3L57.1,10.9L57.4,10.7L57.7,10.8L58.0,10.4L58.2,9.9L58.5,10.1L58.8,9.9L59.1,10.3L59.4,10.0L59.6,10.0L59.9,10.3L60.2,10.7L60.5,11.0L60.8,10.7L61.1,10.4L61.3,10.1L61.6,10.1L61.9,10.1L62.2,10.1L62.5,10.0L62.7,9.8L63.0,9.8L63.3,9.6L63.6,9.5L63.9,9.9L64.2,9.6L64.4,9.1L64.7,9.6L65.0,9.1" fill="none" stroke="#2d9e2d" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
+  </div>
+  <div class="rin-card-val-row">
+    <div class="rin-card-val">28.8%</div>
+    <span class="rin-trend-arrow rin-trend-good">▲</span>
+    
+  </div>
+  
+  <div class="rin-card-comparator"><span class="rin-card-comparator-label">Historical average (2008-2026)</span><span class="rin-card-comparator-val">17.2%</span></div>
+  <div class="rin-card-desc">Online sales as a share of total retail sales</div>
+  <div class="rin-card-actions">
+    
+    <button class="rin-card-ts-btn" onclick="rinOpenTimeSeries('industry_size','online_share')">View time series →</button>
+  </div>
+</div>
+  </div>
+</section>
+<section class="rin-theme" id="theme-employment">
+  <div class="rin-theme-hdr" style="--theme-color:#F37021">
+    <h2>Employment</h2>
+  </div>
+  <div class="rin-card-grid">
+    <div class="rin-card" data-theme="employment" data-card="jobs">
+  <div class="rin-card-label">Jobs</div>
+  <div class="rin-card-period-row">
+    <div class="rin-card-period">2026</div>
+    <div class="rin-card-spark"><svg width="68" height="30" viewBox="0 0 68 30" xmlns="http://www.w3.org/2000/svg" style="overflow:visible"><path d="M3.0,21.8L5.1,17.6L7.1,15.0L9.2,16.0L11.3,13.4L13.3,8.2L15.4,6.1L17.5,4.6L19.5,3.5L21.6,3.5L23.7,4.0L25.7,4.0L27.8,3.0L29.9,7.7L31.9,10.3L34.0,10.8L36.1,8.7L38.1,9.8L40.2,7.2L42.3,4.6L44.3,6.7L46.4,7.2L48.5,8.7L50.5,9.8L52.6,9.8L54.7,11.3L56.7,17.6L58.8,18.7L60.9,21.3L62.9,24.4L65.0,27.0" fill="none" stroke="#e03030" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
+  </div>
+  <div class="rin-card-val-row">
+    <div class="rin-card-val">2.76m</div>
+    <span class="rin-trend-arrow rin-trend-bad">▼</span>
+    <div class="rin-card-secondary">7.5% of UK jobs</div>
+  </div>
+  
+  <div class="rin-card-comparator"><span class="rin-card-comparator-label">Historical average (levels)</span><span class="rin-card-comparator-val">3.07m</span></div>
+  <div class="rin-card-desc">Employee + self-employed jobs in retail (UK totals, SIC 47), annual average</div>
+  <div class="rin-card-actions">
+    
+    <button class="rin-card-ts-btn" onclick="rinOpenTimeSeries('employment','jobs')">View time series →</button>
+  </div>
+</div>
+<div class="rin-card" data-theme="employment" data-card="vacancies">
+  <div class="rin-card-label">Vacancies</div>
+  <div class="rin-card-period-row">
+    <div class="rin-card-period">2026</div>
+    <div class="rin-card-spark"><svg width="68" height="30" viewBox="0 0 68 30" xmlns="http://www.w3.org/2000/svg" style="overflow:visible"><path d="M3.0,8.9L5.5,7.8L8.0,11.8L10.4,5.3L12.9,5.0L15.4,10.4L17.9,7.4L20.4,10.5L22.8,19.7L25.3,18.0L27.8,18.4L30.3,17.8L32.8,14.8L35.2,10.2L37.7,7.8L40.2,5.5L42.7,6.4L45.2,8.7L47.6,9.4L50.1,27.0L52.6,14.6L55.1,3.0L57.6,11.3L60.0,21.4L62.5,25.3L65.0,26.9" fill="none" stroke="#e03030" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
+  </div>
+  <div class="rin-card-val-row">
+    <div class="rin-card-val">49,000</div>
+    <span class="rin-trend-arrow rin-trend-bad">▼</span>
+    <div class="rin-card-secondary">6.8% of all vacancies</div>
+  </div>
+  
+  <div class="rin-card-comparator"><span class="rin-card-comparator-label">Historical average (levels)</span><span class="rin-card-comparator-val">80,202</span></div>
+  <div class="rin-card-desc">Wholesale & retail vacancies, annual average of non-overlapping quarters</div>
+  <div class="rin-card-actions">
+    
+    <button class="rin-card-ts-btn" onclick="rinOpenTimeSeries('employment','vacancies')">View time series →</button>
+  </div>
+</div>
+<div class="rin-card" data-theme="employment" data-card="wage_growth">
+  <div class="rin-card-label">Wage Growth</div>
+  <div class="rin-card-period-row">
+    <div class="rin-card-period">2025</div>
+    <div class="rin-card-spark"><svg width="68" height="30" viewBox="0 0 68 30" xmlns="http://www.w3.org/2000/svg" style="overflow:visible"><path d="M3.0,18.5L9.9,21.7L16.8,20.1L23.7,21.3L30.6,27.0L37.4,14.4L44.3,8.7L51.2,3.4L58.1,3.0L65.0,10.7" fill="none" stroke="#2d9e2d" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
+  </div>
+  <div class="rin-card-val-row">
+    <div class="rin-card-val">6.4% YoY</div>
+    <span class="rin-trend-arrow rin-trend-good">▲</span>
+    <div class="rin-card-secondary">5.2% YoY (UK)</div>
+  </div>
+  
+  <div class="rin-card-comparator"><span class="rin-card-comparator-label">Historical average growth (2016-2025)</span><span class="rin-card-comparator-val">5.4% YoY</span></div>
+  <div class="rin-card-desc">Median pay growth, Wholesale & Retail vs. UK (RTI)</div>
+  <div class="rin-card-actions">
+    
+    <button class="rin-card-ts-btn" onclick="rinOpenTimeSeries('employment','wage_growth')">View time series →</button>
+  </div>
+</div>
+<div class="rin-card" data-theme="employment" data-card="productivity">
+  <div class="rin-card-label">Productivity</div>
+  <div class="rin-card-period-row">
+    <div class="rin-card-period">2025</div>
+    <div class="rin-card-spark"><svg width="68" height="30" viewBox="0 0 68 30" xmlns="http://www.w3.org/2000/svg" style="overflow:visible"><path d="M3.0,16.5L5.3,19.0L7.6,4.3L9.9,20.8L12.2,11.5L14.5,23.8L16.8,14.0L19.1,11.5L21.4,6.5L23.7,16.2L26.0,27.0L28.3,25.3L30.6,3.0L32.9,14.7L35.1,22.7L37.4,19.2L39.7,11.2L42.0,10.0L44.3,10.8L46.6,14.8L48.9,10.5L51.2,14.7L53.5,17.8L55.8,16.8L58.1,17.7L60.4,22.8L62.7,18.3L65.0,8.8" fill="none" stroke="#2d9e2d" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
+  </div>
+  <div class="rin-card-val-row">
+    <div class="rin-card-val">4.1% YoY</div>
+    <span class="rin-trend-arrow rin-trend-good">▲</span>
+    <div class="rin-card-secondary">0.0% YoY (UK)</div>
+  </div>
+  
+  <div class="rin-card-comparator"><span class="rin-card-comparator-label">Historical average growth (1998-2025)</span><span class="rin-card-comparator-val">0.2% YoY</span></div>
+  <div class="rin-card-desc">Output per hour worked, Retail vs. UK (chained volume, 2023=100)</div>
+  <div class="rin-card-actions">
+    
+    <button class="rin-card-ts-btn" onclick="rinOpenTimeSeries('employment','productivity')">View time series →</button>
+  </div>
+</div>
+<div class="rin-card" data-theme="employment" data-card="redundancies">
+  <div class="rin-card-label">Redundancies</div>
+  <div class="rin-card-period-row">
+    <div class="rin-card-period">2025</div>
+    <div class="rin-card-spark"><svg width="68" height="30" viewBox="0 0 68 30" xmlns="http://www.w3.org/2000/svg" style="overflow:visible"><path d="M3.0,7.6L6.9,16.4L10.8,18.8L14.6,17.9L18.5,18.2L22.4,24.0L26.2,23.6L30.1,23.3L34.0,23.1L37.9,22.1L41.8,22.1L45.6,3.0L49.5,20.9L53.4,26.5L57.2,25.9L61.1,27.0L65.0,22.4" fill="none" stroke="#2d9e2d" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
+  </div>
+  <div class="rin-card-val-row">
+    <div class="rin-card-val">66,578</div>
+    <span class="rin-trend-arrow rin-trend-good">▼</span>
+    
+  </div>
+  
+  <div class="rin-card-comparator"><span class="rin-card-comparator-label">Historical average (2009-2025)</span><span class="rin-card-comparator-val">76,826</span></div>
+  <div class="rin-card-desc">Wholesale, retail & repair of motor vehicles, annual total</div>
+  <div class="rin-card-actions">
+    
+    <button class="rin-card-ts-btn" onclick="rinOpenTimeSeries('employment','redundancies')">View time series →</button>
+  </div>
+</div>
+  </div>
+</section>
+<section class="rin-theme" id="theme-tax">
+  <div class="rin-theme-hdr" style="--theme-color:#92278F">
+    <h2>Tax</h2>
+  </div>
+  <div class="rin-card-grid">
+    <div class="rin-card" data-theme="tax" data-card="corp_tax">
+  <div class="rin-card-label">Corporation Tax</div>
+  <div class="rin-card-period-row">
+    <div class="rin-card-period">2024-25</div>
+    <div class="rin-card-spark"><svg width="68" height="30" viewBox="0 0 68 30" xmlns="http://www.w3.org/2000/svg" style="overflow:visible"><path d="M3.0,21.0L15.4,27.0L27.8,14.1L40.2,9.8L52.6,8.9L65.0,3.0" fill="none" stroke="#2d9e2d" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
+  </div>
+  <div class="rin-card-val-row">
+    <div class="rin-card-val">£10.04bn</div>
+    <span class="rin-trend-arrow rin-trend-good">▲</span>
+    <div class="rin-card-secondary">11.0% of total CT receipts</div>
+  </div>
+  
+  <div class="rin-card-comparator"><span class="rin-card-comparator-label">Historical average (2019-20-2024-25)</span><span class="rin-card-comparator-val">£8.00bn</span></div>
+  <div class="rin-card-desc">Section G: Wholesale and Retail Trade, Repairs</div>
+  <div class="rin-card-actions">
+    
+    <button class="rin-card-ts-btn" onclick="rinOpenTimeSeries('tax','corp_tax')">View time series →</button>
+  </div>
+</div>
+<div class="rin-card" data-theme="tax" data-card="vat_population">
+  <div class="rin-card-label">VAT Population</div>
+  <div class="rin-card-period-row">
+    <div class="rin-card-period">2024-25</div>
+    <div class="rin-card-spark"><svg width="68" height="30" viewBox="0 0 68 30" xmlns="http://www.w3.org/2000/svg" style="overflow:visible"><path d="M3.0,27.0L6.1,25.6L9.2,25.4L12.3,26.4L15.4,25.3L18.5,25.6L21.6,26.3L24.7,26.5L27.8,26.8L30.9,26.3L34.0,26.4L37.1,25.9L40.2,24.6L43.3,21.0L46.4,17.8L49.5,14.1L52.6,8.2L55.7,3.0L58.8,10.0L61.9,12.0L65.0,10.8" fill="none" stroke="#2d9e2d" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
+  </div>
+  <div class="rin-card-val-row">
+    <div class="rin-card-val">511,300</div>
+    <span class="rin-trend-arrow rin-trend-good">▲</span>
+    <div class="rin-card-secondary">21.9% of total VAT population</div>
+  </div>
+  <div class="rin-card-note">Section G: Wholesale and Retail Trade</div>
+  <div class="rin-card-comparator"><span class="rin-card-comparator-label">Historical average (2004-05-2024-25)</span><span class="rin-card-comparator-val">430,619</span></div>
+  <div class="rin-card-desc">VAT-registered traders, UK</div>
+  <div class="rin-card-actions">
+    <button class="rin-card-toggle-btn" onclick="rinToggleCard(this, 'tax', 'vat_population')" data-state="default">Retail trade only (SIC 47) →</button>
+    <button class="rin-card-ts-btn" onclick="rinOpenTimeSeries('tax','vat_population')">View time series →</button>
+  </div>
+</div>
+<div class="rin-card" data-theme="tax" data-card="vat_receipts">
+  <div class="rin-card-label">VAT Receipts</div>
+  <div class="rin-card-period-row">
+    <div class="rin-card-period">2024-25</div>
+    <div class="rin-card-spark"><svg width="68" height="30" viewBox="0 0 68 30" xmlns="http://www.w3.org/2000/svg" style="overflow:visible"><path d="M3.0,26.4L6.1,27.0L9.2,25.7L12.3,25.7L15.4,25.2L18.5,25.7L21.6,25.1L24.7,24.3L27.8,24.9L30.9,21.8L34.0,21.7L37.1,21.6L40.2,20.3L43.3,20.0L46.4,20.0L49.5,19.5L52.6,19.3L55.7,8.1L58.8,7.2L61.9,3.8L65.0,3.0" fill="none" stroke="#2d9e2d" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
+  </div>
+  <div class="rin-card-val-row">
+    <div class="rin-card-val">£56.70bn</div>
+    <span class="rin-trend-arrow rin-trend-good">▲</span>
+    <div class="rin-card-secondary">32.0% of total Net Home VAT</div>
+  </div>
+  <div class="rin-card-note">Section G: Wholesale and Retail Trade</div>
+  <div class="rin-card-comparator"><span class="rin-card-comparator-label">Historical average (2004-05-2024-25)</span><span class="rin-card-comparator-val">£28.73bn</span></div>
+  <div class="rin-card-desc">Net Home VAT, UK</div>
+  <div class="rin-card-actions">
+    <button class="rin-card-toggle-btn" onclick="rinToggleCard(this, 'tax', 'vat_receipts')" data-state="default">Retail trade only (SIC 47) →</button>
+    <button class="rin-card-ts-btn" onclick="rinOpenTimeSeries('tax','vat_receipts')">View time series →</button>
+  </div>
+</div>
+  </div>
+</section>
+<section class="rin-theme" id="theme-business_demographics">
+  <div class="rin-theme-hdr" style="--theme-color:#8CC747">
+    <h2>Business Demographics</h2>
+  </div>
+  <div class="rin-card-grid">
+    <div class="rin-card" data-theme="business_demographics" data-card="registered_businesses">
+  <div class="rin-card-label">Number of Registered Businesses</div>
+  <div class="rin-card-period-row">
+    <div class="rin-card-period">2025</div>
+    <div class="rin-card-spark"><svg width="68" height="30" viewBox="0 0 68 30" xmlns="http://www.w3.org/2000/svg" style="overflow:visible"><path d="M3.0,25.4L7.1,27.0L11.3,25.1L15.4,26.7L19.5,24.7L23.7,22.7L27.8,23.1L31.9,19.8L36.1,16.0L40.2,10.6L44.3,10.5L48.5,3.4L52.6,3.0L56.7,10.9L60.9,13.6L65.0,15.9" fill="none" stroke="#2d9e2d" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
+  </div>
+  <div class="rin-card-val-row">
+    <div class="rin-card-val">299,565</div>
+    <span class="rin-trend-arrow rin-trend-good">▲</span>
+    
+  </div>
+  
+  <div class="rin-card-comparator"><span class="rin-card-comparator-label">Historical average (2010-2025)</span><span class="rin-card-comparator-val">297,501</span></div>
+  <div class="rin-card-desc">VAT/PAYE-registered retail enterprises, SIC 47, UK (Nomis)</div>
+  <div class="rin-card-actions">
+    
+    <button class="rin-card-ts-btn" onclick="rinOpenTimeSeries('business_demographics','registered_businesses')">View time series →</button>
+  </div>
+</div>
+<div class="rin-card" data-theme="business_demographics" data-card="employers">
+  <div class="rin-card-label">Number of Employers</div>
+  <div class="rin-card-period-row">
+    <div class="rin-card-period">2025</div>
+    <div class="rin-card-spark"><svg width="68" height="30" viewBox="0 0 68 30" xmlns="http://www.w3.org/2000/svg" style="overflow:visible"><path d="M3.0,21.7L13.3,27.0L23.7,24.8L34.0,3.0L44.3,8.3L54.7,16.3L65.0,21.1" fill="none" stroke="#e03030" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
+  </div>
+  <div class="rin-card-val-row">
+    <div class="rin-card-val">129,535</div>
+    <span class="rin-trend-arrow rin-trend-bad">▼</span>
+    
+  </div>
+  
+  <div class="rin-card-comparator"><span class="rin-card-comparator-label">Historical average (2019-2025)</span><span class="rin-card-comparator-val">130,739</span></div>
+  <div class="rin-card-desc">Retail employers, SIC 47, UK (Business Population Estimates)</div>
+  <div class="rin-card-actions">
+    
+    <button class="rin-card-ts-btn" onclick="rinOpenTimeSeries('business_demographics','employers')">View time series →</button>
+  </div>
+</div>
+<div class="rin-card" data-theme="business_demographics" data-card="turnover">
+  <div class="rin-card-label">Turnover</div>
+  <div class="rin-card-period-row">
+    <div class="rin-card-period">2025</div>
+    <div class="rin-card-spark"><svg width="68" height="30" viewBox="0 0 68 30" xmlns="http://www.w3.org/2000/svg" style="overflow:visible"><path d="M3.0,27.0L13.3,22.4L23.7,21.2L34.0,19.9L44.3,13.6L54.7,7.8L65.0,3.0" fill="none" stroke="#2d9e2d" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
+  </div>
+  <div class="rin-card-val-row">
+    <div class="rin-card-val">£529.42bn</div>
+    <span class="rin-trend-arrow rin-trend-good">▲</span>
+    
+  </div>
+  
+  <div class="rin-card-comparator"><span class="rin-card-comparator-label">Historical average (2019-2025)</span><span class="rin-card-comparator-val">£472.81bn</span></div>
+  <div class="rin-card-desc">Retail turnover, SIC 47, UK (Business Population Estimates)</div>
+  <div class="rin-card-actions">
+    
+    <button class="rin-card-ts-btn" onclick="rinOpenTimeSeries('business_demographics','turnover')">View time series →</button>
+  </div>
+</div>
+<div class="rin-card" data-theme="business_demographics" data-card="insolvencies">
+  <div class="rin-card-label">Insolvencies</div>
+  <div class="rin-card-period-row">
+    <div class="rin-card-period">2025</div>
+    <div class="rin-card-spark"><svg width="68" height="30" viewBox="0 0 68 30" xmlns="http://www.w3.org/2000/svg" style="overflow:visible"><path d="M3.0,25.1L9.9,23.0L16.8,20.6L23.7,19.4L30.6,27.0L37.4,26.3L44.3,10.4L51.2,3.0L58.1,8.4L65.0,7.5" fill="none" stroke="#e03030" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
+  </div>
+  <div class="rin-card-val-row">
+    <div class="rin-card-val">2,069</div>
+    <span class="rin-trend-arrow rin-trend-bad">▲</span>
+    
+  </div>
+  
+  <div class="rin-card-comparator"><span class="rin-card-comparator-label">Historical average (2016-2025)</span><span class="rin-card-comparator-val">1,505</span></div>
+  <div class="rin-card-desc">Retail trade (SIC division 47) company insolvencies, GB (England & Wales + Scotland)</div>
+  <div class="rin-card-actions">
+    
+    <button class="rin-card-ts-btn" onclick="rinOpenTimeSeries('business_demographics','insolvencies')">View time series →</button>
+  </div>
+</div>
+  </div>
+</section>
+  </main>
+  <footer class="rin-footer">
+    <p>Source: ONS, HMRC, Insolvency Service, Nomis. Figures update periodically; see each card for the latest period covered.</p>
+  </footer>
+</div>
+
+<div class="rin-modal-overlay" id="rin-modal-overlay" onclick="if(event.target===this)rinCloseModal()">
+  <div class="rin-modal">
+    <div class="rin-modal-hdr">
+      <div>
+        <div class="rin-modal-title" id="rin-modal-title"></div>
+        <div class="rin-modal-sub" id="rin-modal-sub"></div>
+      </div>
+      <button class="rin-modal-close" onclick="rinCloseModal()" aria-label="Close">&times;</button>
+    </div>
+    <div class="rin-modal-variants" id="rin-modal-variants" style="display:none"></div>
+    <div class="rin-modal-chart" id="rin-modal-chart"></div>
+  </div>
+</div>
+
+<script>
+var RIN_DATA = {"themes":[{"key":"industry_size","label":"Industry Size","color":"#00BBCE","cards":[{"key":"sales_value","label":"Total Sales in Value Terms","description":"Non-seasonally adjusted, ex. automotive fuel, current prices","latest_period":"2025","latest_value":491.08,"unit":"\u00a3bn","comparator_label":"Avg. annual growth (1986-2025)","comparator_value":3.9,"comparator_unit":"% CAGR","good_direction":"up","levels_average":272.05,"time_series":{"periods":["1986","1987","1988","1989","1990","1991","1992","1993","1994","1995","1996","1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025"],"values":[110.39,116.75,128.39,137.91,147.84,155.6,157.35,164.64,171.53,176.87,189.67,195.85,202.55,208.03,214.89,226.46,241.47,241.76,252.95,255.69,261.98,271.35,285.07,285.27,292.35,302.77,310.76,321.05,339.72,339.45,350.85,366.09,380.7,393.74,402.92,421.32,439.57,461.49,468.02,491.08]},"time_series_variants":{"levels":{"label":"Levels (\u00a3bn)","periods":["1986","1987","1988","1989","1990","1991","1992","1993","1994","1995","1996","1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025"],"values":[110.39,116.75,128.39,137.91,147.84,155.6,157.35,164.64,171.53,176.87,189.67,195.85,202.55,208.03,214.89,226.46,241.47,241.76,252.95,255.69,261.98,271.35,285.07,285.27,292.35,302.77,310.76,321.05,339.72,339.45,350.85,366.09,380.7,393.74,402.92,421.32,439.57,461.49,468.02,491.08],"unit":"\u00a3bn"},"growth":{"label":"Growth (% YoY)","periods":["1987","1988","1989","1990","1991","1992","1993","1994","1995","1996","1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025"],"values":[5.76,9.98,7.41,7.2,5.25,1.13,4.63,4.19,3.12,7.23,3.26,3.42,2.7,3.3,5.38,6.63,0.12,4.63,1.08,2.46,3.58,5.06,0.07,2.48,3.56,2.64,3.31,5.82,-0.08,3.36,4.34,3.99,3.42,2.33,4.57,4.33,4.99,1.42,4.93],"unit":"%"}}},{"key":"sales_volume","label":"Total Sales in Volume Terms","description":"Seasonally adjusted, ex. automotive fuel, chained volume measures","latest_period":"2025","latest_value":477.87,"unit":"\u00a3bn","comparator_label":"Avg. annual growth (1994-2025)","comparator_value":2.0,"comparator_unit":"% CAGR","good_direction":"up","levels_average":388.05,"time_series":{"periods":["1994","1995","1996","1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025"],"values":[258.24,259.5,272.37,278.2,284.22,291.61,303.22,331.99,359.4,359.8,376.88,378.51,385.02,393.04,398.78,392.02,389.88,386.12,387.69,393.21,417.11,424.52,444.29,451.85,461.44,474.43,488.6,499.02,476.09,461.49,461.16,477.87]},"time_series_variants":{"levels":{"label":"Levels (\u00a3bn)","periods":["1994","1995","1996","1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025"],"values":[258.24,259.5,272.37,278.2,284.22,291.61,303.22,331.99,359.4,359.8,376.88,378.51,385.02,393.04,398.78,392.02,389.88,386.12,387.69,393.21,417.11,424.52,444.29,451.85,461.44,474.43,488.6,499.02,476.09,461.49,461.16,477.87],"unit":"\u00a3bn"},"growth":{"label":"Growth (% YoY)","periods":["1995","1996","1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025"],"values":[0.49,4.96,2.14,2.16,2.6,3.98,9.49,8.26,0.11,4.75,0.43,1.72,2.08,1.46,-1.69,-0.55,-0.96,0.41,1.42,6.08,1.78,4.66,1.7,2.12,2.81,2.99,2.13,-4.59,-3.07,-0.07,3.62],"unit":"%"}}},{"key":"gva","label":"Gross Value Added (GVA)","description":"Retail trade (ex. wholesale), chained volume measures, UK","latest_period":"2025","latest_value":113.91,"unit":"\u00a3bn","secondary_value":4.47,"secondary_unit":"% of UK GVA","comparator_label":"Avg. annual growth (1990-2025)","comparator_value":0.7,"comparator_unit":"% CAGR","good_direction":"up","levels_average":115.48,"time_series":{"periods":["1990","1991","1992","1993","1994","1995","1996","1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025"],"values":[90.33,88.4,92.21,99.2,103.93,105.81,109.37,112.49,114.03,113.6,120.46,121.16,123.09,118.33,121.89,123.5,126.34,126.52,121.81,108.21,115.24,116.0,115.09,114.24,119.97,123.24,126.9,130.29,130.42,129.69,113.66,122.81,119.36,113.14,112.51,113.91]},"time_series_variants":{"levels":{"label":"Levels (\u00a3bn)","periods":["1990","1991","1992","1993","1994","1995","1996","1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025"],"values":[90.33,88.4,92.21,99.2,103.93,105.81,109.37,112.49,114.03,113.6,120.46,121.16,123.09,118.33,121.89,123.5,126.34,126.52,121.81,108.21,115.24,116.0,115.09,114.24,119.97,123.24,126.9,130.29,130.42,129.69,113.66,122.81,119.36,113.14,112.51,113.91],"unit":"\u00a3bn"},"growth":{"label":"Growth (% YoY)","periods":["1991","1992","1993","1994","1995","1996","1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025"],"values":[-2.14,4.31,7.58,4.76,1.81,3.37,2.85,1.37,-0.38,6.04,0.58,1.59,-3.87,3.01,1.32,2.3,0.14,-3.72,-11.16,6.49,0.66,-0.79,-0.74,5.02,2.72,2.97,2.67,0.1,-0.56,-12.35,8.05,-2.81,-5.21,-0.55,1.24],"unit":"%"},"share":{"label":"Share of UK GVA (%)","periods":["1990","1991","1992","1993","1994","1995","1996","1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025"],"values":[6.63,6.56,6.81,7.16,7.28,7.24,7.28,7.18,7.05,6.82,6.91,6.79,6.79,6.33,6.39,6.28,6.28,6.11,5.87,5.46,5.68,5.67,5.53,5.4,5.49,5.54,5.57,5.54,5.47,5.36,5.2,5.17,4.8,4.53,4.47,4.47],"unit":"%"}}},{"key":"online_share","label":"Online Sales % of Total Retail","description":"Online sales as a share of total retail sales","latest_period":"2026-05","latest_value":28.8,"unit":"%","comparator_label":"Historical average (2008-2026)","comparator_value":17.22,"comparator_unit":"%","good_direction":"up","time_series":{"periods":["2008-01","2008-02","2008-03","2008-04","2008-05","2008-06","2008-07","2008-08","2008-09","2008-10","2008-11","2008-12","2009-01","2009-02","2009-03","2009-04","2009-05","2009-06","2009-07","2009-08","2009-09","2009-10","2009-11","2009-12","2010-01","2010-02","2010-03","2010-04","2010-05","2010-06","2010-07","2010-08","2010-09","2010-10","2010-11","2010-12","2011-01","2011-02","2011-03","2011-04","2011-05","2011-06","2011-07","2011-08","2011-09","2011-10","2011-11","2011-12","2012-01","2012-02","2012-03","2012-04","2012-05","2012-06","2012-07","2012-08","2012-09","2012-10","2012-11","2012-12","2013-01","2013-02","2013-03","2013-04","2013-05","2013-06","2013-07","2013-08","2013-09","2013-10","2013-11","2013-12","2014-01","2014-02","2014-03","2014-04","2014-05","2014-06","2014-07","2014-08","2014-09","2014-10","2014-11","2014-12","2015-01","2015-02","2015-03","2015-04","2015-05","2015-06","2015-07","2015-08","2015-09","2015-10","2015-11","2015-12","2016-01","2016-02","2016-03","2016-04","2016-05","2016-06","2016-07","2016-08","2016-09","2016-10","2016-11","2016-12","2017-01","2017-02","2017-03","2017-04","2017-05","2017-06","2017-07","2017-08","2017-09","2017-10","2017-11","2017-12","2018-01","2018-02","2018-03","2018-04","2018-05","2018-06","2018-07","2018-08","2018-09","2018-10","2018-11","2018-12","2019-01","2019-02","2019-03","2019-04","2019-05","2019-06","2019-07","2019-08","2019-09","2019-10","2019-11","2019-12","2020-01","2020-02","2020-03","2020-04","2020-05","2020-06","2020-07","2020-08","2020-09","2020-10","2020-11","2020-12","2021-01","2021-02","2021-03","2021-04","2021-05","2021-06","2021-07","2021-08","2021-09","2021-10","2021-11","2021-12","2022-01","2022-02","2022-03","2022-04","2022-05","2022-06","2022-07","2022-08","2022-09","2022-10","2022-11","2022-12","2023-01","2023-02","2023-03","2023-04","2023-05","2023-06","2023-07","2023-08","2023-09","2023-10","2023-11","2023-12","2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05"],"values":[4.2,4.3,4.5,4.7,4.6,5.0,4.9,5.1,5.3,5.3,5.4,5.8,5.7,5.9,5.8,6.0,6.0,6.0,6.3,6.3,6.3,6.7,7.0,6.6,6.7,6.7,6.6,6.8,7.0,6.9,7.3,7.6,7.6,7.9,8.0,7.9,8.2,7.9,7.9,7.6,7.9,8.2,8.3,8.4,8.6,8.5,9.0,8.8,9.0,9.2,8.9,9.3,9.5,9.1,9.7,8.9,9.3,9.3,9.3,10.0,10.0,10.1,10.6,10.3,10.2,10.4,10.2,10.6,10.6,10.7,10.7,10.4,10.7,10.9,11.0,11.1,11.5,11.3,11.4,11.5,11.4,11.6,11.6,11.8,12.4,11.9,12.1,12.5,12.2,12.5,12.6,12.5,12.7,12.8,13.1,13.1,13.8,13.3,13.6,13.9,14.2,14.6,14.4,14.8,15.5,15.7,16.0,16.2,15.8,15.7,16.0,15.9,15.9,16.4,16.5,16.6,16.8,16.6,16.8,16.9,17.1,17.3,17.9,17.7,18.1,18.2,18.1,18.0,18.1,18.2,18.3,18.6,18.5,18.8,19.3,19.1,19.2,18.9,19.6,19.5,19.0,19.3,19.3,19.5,19.5,19.5,23.1,32.0,34.4,32.7,29.7,28.9,28.2,29.5,32.2,29.5,36.2,37.2,35.8,30.6,29.3,28.8,28.8,29.2,29.3,28.8,28.2,28.5,28.6,28.0,26.7,27.3,26.7,26.2,25.7,25.9,26.1,26.0,25.9,26.1,26.2,26.1,26.5,26.6,26.8,26.5,27.1,26.9,26.7,26.6,27.1,27.2,26.4,26.6,26.5,27.0,27.7,27.5,27.7,27.2,27.6,27.6,27.2,26.6,26.2,26.6,27.0,27.4,27.4,27.5,27.4,27.6,27.8,27.9,28.1,28.3,27.7,28.1,28.8,28.1,28.8]}}]},{"key":"employment","label":"Employment","color":"#F37021","cards":[{"key":"jobs","label":"Jobs","description":"Employee + self-employed jobs in retail (UK totals, SIC 47), annual average","latest_period":"2026","latest_value":2.76,"unit":"m jobs","secondary_value":7.54,"secondary_unit":"% of UK jobs","comparator_label":"Historical average (levels)","comparator_value":3.07,"comparator_unit":"m jobs","good_direction":"up","time_series":{"periods":["1996","1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025","2026"],"values":[2.86,2.94,2.99,2.97,3.02,3.12,3.16,3.19,3.21,3.21,3.2,3.2,3.22,3.13,3.08,3.07,3.11,3.09,3.14,3.19,3.15,3.14,3.11,3.09,3.09,3.06,2.94,2.92,2.87,2.81,2.76]}},{"key":"vacancies","label":"Vacancies","description":"Wholesale & retail vacancies, annual average of non-overlapping quarters","latest_period":"2026","latest_value":49000,"unit":"vacancies","secondary_value":6.85,"secondary_unit":"% of all vacancies","comparator_label":"Historical average (levels)","comparator_value":80202,"comparator_unit":"vacancies","good_direction":"up","time_series":{"periods":["2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025","2026"],"values":[89000,91250,82500,97000,97500,85500,92250,85250,65000,68750,67750,69250,75750,86000,91250,96500,94500,89250,87750,48750,76250,102000,83500,61250,52500,49000]},"time_series_variants":{"levels":{"label":"Levels (vacancies)","periods":["2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025","2026"],"values":[89000,91250,82500,97000,97500,85500,92250,85250,65000,68750,67750,69250,75750,86000,91250,96500,94500,89250,87750,48750,76250,102000,83500,61250,52500,49000],"unit":"vacancies"},"share":{"label":"Share of all vacancies (%)","periods":["2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025","2026"],"values":[13.72,14.92,13.88,15.04,15.51,14.05,13.81,13.66,14.57,14.58,14.48,14.35,14.03,12.88,12.39,12.86,11.89,10.66,10.64,8.8,7.86,8.28,8.3,7.18,7.07,6.85],"unit":"%"}}},{"key":"wage_growth","label":"Wage Growth","description":"Median pay growth, Wholesale & Retail vs. UK (RTI)","latest_period":"2025","latest_value":6.4,"unit":"% YoY","secondary_value":5.2,"secondary_unit":"% YoY (UK)","comparator_label":"Historical average growth (2016-2025)","comparator_value":5.4,"comparator_unit":"% YoY","comparator_secondary_value":4.5,"comparator_secondary_unit":"% YoY (UK)","good_direction":"up","time_series":{"periods":["2016","2017","2018","2019","2020","2021","2022","2023","2024","2025"],"values":[4.5,3.7,4.1,3.8,2.4,5.5,6.9,8.2,8.3,6.4]}},{"key":"productivity","label":"Productivity","description":"Output per hour worked, Retail vs. UK (chained volume, 2023=100)","latest_period":"2025","latest_value":4.1,"unit":"% YoY","secondary_value":0.0,"secondary_unit":"% YoY (UK)","comparator_label":"Historical average growth (1998-2025)","comparator_value":0.2,"comparator_unit":"% YoY","comparator_secondary_value":1.0,"comparator_secondary_unit":"% YoY (UK)","good_direction":"up","extra":{"vs_2019_retail":-5.2,"vs_2019_uk":2.3},"time_series":{"periods":["1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025"],"values":[-0.5,-2.0,6.8,-3.1,2.5,-4.9,1.0,2.5,5.5,-0.3,-6.8,-5.8,7.6,0.6,-4.2,-2.1,2.7,3.4,2.9,0.5,3.1,0.6,-1.3,-0.7,-1.2,-4.3,-1.6,4.1]}},{"key":"redundancies","label":"Redundancies","description":"Wholesale, retail & repair of motor vehicles, annual total","latest_period":"2025","latest_value":66578,"unit":"redundancies","comparator_label":"Historical average (2009-2025)","comparator_value":76826,"comparator_unit":"redundancies/yr","good_direction":"down","time_series":{"periods":["2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025"],"values":[135687,94495,83094,87293,86054,58997,60701,62338,62960,67750,67534,157397,73448,47073,49891,44760,66578]}}]},{"key":"tax","label":"Tax","color":"#92278F","cards":[{"key":"corp_tax","label":"Corporation Tax","description":"Section G: Wholesale and Retail Trade, Repairs","latest_period":"2024-25","latest_value":10.04,"unit":"\u00a3bn","format":"\u00a30.00bn","secondary_value":11.02,"secondary_unit":"% of total CT receipts","comparator_label":"Historical average (2019-20-2024-25)","comparator_value":8.0,"comparator_unit":"\u00a3bn","good_direction":"up","source_url":"https://assets.publishing.service.gov.uk/media/68cac9bf2fe4b313286c9ffb/Corporation_Tax_Data_Tables_2025.ods","time_series":{"periods":["2019-20","2020-21","2021-22","2022-23","2023-24","2024-25"],"values":[6.69,5.58,7.98,8.78,8.94,10.04]}},{"key":"vat_population","label":"VAT Population","description":"VAT-registered traders, UK","note":"Section G: Wholesale and Retail Trade","latest_period":"2024-25","latest_value":511300,"unit":"traders","secondary_value":21.94,"secondary_unit":"% of total VAT population","comparator_label":"Historical average (2004-05-2024-25)","comparator_value":430619,"comparator_unit":"traders","good_direction":"up","toggle":{"label":"Retail trade only (SIC 47)","value":335600,"unit":"traders","secondary_value":14.4,"secondary_unit":"% of total VAT population"},"source_url":"https://assets.publishing.service.gov.uk/media/6925c68f9fd433badebc317f/Annual_UK_VAT_Statistics_2024-25.ods","time_series":{"periods":["2004-05","2005-06","2006-07","2007-08","2008-09","2009-10","2010-11","2011-12","2012-13","2013-14","2014-15","2015-16","2016-17","2017-18","2018-19","2019-20","2020-21","2021-22","2022-23","2023-24","2024-25"],"values":[379400,390700,392100,384200,392900,390600,385000,383500,381000,385500,384500,388000,398800,428700,454700,484600,532500,575200,518000,501800,511300]},"time_series_toggle":{"periods":["2004-05","2005-06","2006-07","2007-08","2008-09","2009-10","2010-11","2011-12","2012-13","2013-14","2014-15","2015-16","2016-17","2017-18","2018-19","2019-20","2020-21","2021-22","2022-23","2023-24","2024-25"],"values":[201400,208100,208500,203600,208400,207700,205600,205800,204900,208000,206500,208400,217300,245600,270600,295000,339400,376500,333200,324800,335600]}},{"key":"vat_receipts","label":"VAT Receipts","description":"Net Home VAT, UK","note":"Section G: Wholesale and Retail Trade","latest_period":"2024-25","latest_value":56.7,"unit":"\u00a3bn","format":"\u00a30.00bn","secondary_value":32.02,"secondary_unit":"% of total Net Home VAT","comparator_label":"Historical average (2004-05-2024-25)","comparator_value":28.73,"comparator_unit":"\u00a3bn","good_direction":"up","toggle":{"label":"Retail trade only (SIC 47)","value":16.8,"unit":"\u00a3bn","format":"\u00a30.00bn","secondary_value":9.49,"secondary_unit":"% of total Net Home VAT"},"source_url":"https://assets.publishing.service.gov.uk/media/6925c68f9fd433badebc317f/Annual_UK_VAT_Statistics_2024-25.ods","time_series":{"periods":["2004-05","2005-06","2006-07","2007-08","2008-09","2009-10","2010-11","2011-12","2012-13","2013-14","2014-15","2015-16","2016-17","2017-18","2018-19","2019-20","2020-21","2021-22","2022-23","2023-24","2024-25"],"values":[17.8,16.8,18.9,19.0,19.8,19.0,20.0,21.3,20.3,25.5,25.6,25.8,28.0,28.5,28.4,29.2,29.6,48.2,49.7,55.3,56.7]},"time_series_toggle":{"periods":["2004-05","2005-06","2006-07","2007-08","2008-09","2009-10","2010-11","2011-12","2012-13","2013-14","2014-15","2015-16","2016-17","2017-18","2018-19","2019-20","2020-21","2021-22","2022-23","2023-24","2024-25"],"values":[6.25,6.48,6.55,5.69,5.46,5.11,5.04,5.26,5.85,6.27,6.57,7.19,6.42,7.14,7.59,7.72,7.92,12.8,13.8,16.3,16.8]}}]},{"key":"business_demographics","label":"Business Demographics","color":"#8CC747","cards":[{"key":"registered_businesses","label":"Number of Registered Businesses","description":"VAT/PAYE-registered retail enterprises, SIC 47, UK (Nomis)","latest_period":"2025","latest_value":299565,"unit":"businesses","comparator_label":"Historical average (2010-2025)","comparator_value":297501,"comparator_unit":"businesses","good_direction":"up","time_series":{"periods":["2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025"],"values":[286680,284490,287100,284885,287590,290315,289800,294280,299415,306655,306895,316400,317005,306340,302600,299565]}},{"key":"employers","label":"Number of Employers","description":"Retail employers, SIC 47, UK (Business Population Estimates)","latest_period":"2025","latest_value":129535,"unit":"employers","comparator_label":"Historical average (2019-2025)","comparator_value":130739,"comparator_unit":"employers","good_direction":"up","time_series":{"periods":["2019","2020","2021","2022","2023","2024","2025"],"values":[129315,127550,128270,135575,133795,131135,129535]}},{"key":"turnover","label":"Turnover","description":"Retail turnover, SIC 47, UK (Business Population Estimates)","latest_period":"2025","latest_value":529.42,"unit":"\u00a3bn","format":"\u00a30.00bn","comparator_label":"Historical average (2019-2025)","comparator_value":472.81,"comparator_unit":"\u00a3bn","good_direction":"up","time_series":{"periods":["2019","2020","2021","2022","2023","2024","2025"],"values":[428.24,447.46,452.53,458.12,484.53,509.38,529.42]}},{"key":"insolvencies","label":"Insolvencies","description":"Retail trade (SIC division 47) company insolvencies, GB (England & Wales + Scotland)","latest_period":"2025","latest_value":2069,"unit":"insolvencies","comparator_label":"Historical average (2016-2025)","comparator_value":1505,"comparator_unit":"insolvencies/yr","good_direction":"down","source_url_resolver":"_insolvency_url()","time_series":{"periods":["2016","2017","2018","2019","2020","2021","2022","2023","2024","2025"],"values":[1028,1154,1295,1367,917,960,1901,2337,2018,2069]}}]}]};
+var RIN_CARD_THEME = {"sales_value":"industry_size","sales_volume":"industry_size","gva":"industry_size","online_share":"industry_size","jobs":"employment","vacancies":"employment","wage_growth":"employment","productivity":"employment","redundancies":"employment","corp_tax":"tax","vat_population":"tax","vat_receipts":"tax","registered_businesses":"business_demographics","employers":"business_demographics","turnover":"business_demographics","insolvencies":"business_demographics"};
+var RIN_NO_AVG_THEMES = ["tax"];
+var RIN_COLORS = {
+  industry_size: '#00BBCE', employment: '#F37021',
+  tax: '#92278F', business_demographics: '#8CC747'
+};
+
+function rinFmtValue(value, unit, fmt){
+  if(value==null) return '—';
+  if(fmt==='£0.00bn') return '£' + value.toFixed(2) + 'bn';
+  if(unit==='£bn') return '£' + value.toFixed(2) + 'bn';
+  if(unit && unit.indexOf('%')===0){
+    var suffix = unit.slice(1).trim();
+    return value.toFixed(1) + '%' + (suffix ? ' ' + suffix : '');
+  }
+  if(unit==='m jobs') return value.toFixed(2) + 'm';
+  if(unit==='businesses'||unit==='employers'||unit==='traders'||
+     unit==='insolvencies'||unit==='redundancies'||unit==='redundancies/yr'||
+     unit==='vacancies'){
+    return Math.round(value).toLocaleString('en-GB');
+  }
+  if(Number.isInteger(value)) return value.toLocaleString('en-GB');
+  return String(value);
+}
+function rinUnitSuffix(unit){
+  if(!unit) return '';
+  if(unit==='£bn') return 'bn';
+  if(unit==='%') return '%';
+  if(unit==='m jobs') return 'm';
+  if(unit==='businesses'||unit==='employers'||unit==='traders'||
+     unit==='insolvencies'||unit==='redundancies'||unit==='redundancies/yr'||
+     unit==='vacancies') return '';
+  if(unit.indexOf('%')===0) return unit.slice(1);
+  return '';
+}
+var rinActiveVariant = 'levels';
+
+function rinOpenTimeSeries(themeKey, cardKey, useToggle){
+  var theme = RIN_DATA.themes.find(function(t){return t.key===themeKey;});
+  var card = theme.cards.find(function(c){return c.key===cardKey;});
+
+  rinActiveVariant = 'levels';
+
+  document.getElementById('rin-modal-title').textContent =
+    (useToggle && card.toggle) ? card.label + ' — ' + card.toggle.label : card.label;
+  document.getElementById('rin-modal-sub').textContent = card.description || '';
+
+  // Variant pills (levels/growth/share), only for the specific cards that
+  // carry time_series_variants -- not a generic feature, per instruction.
+  var variantsEl = document.getElementById('rin-modal-variants');
+  var variants = (!useToggle && card.time_series_variants) ? card.time_series_variants : null;
+  if(variants){
+    var order = ['levels','growth','share'].filter(function(k){return variants[k];});
+    variantsEl.style.display = 'flex';
+    variantsEl.innerHTML = order.map(function(k){
+      var on = k===rinActiveVariant ? ' on' : '';
+      return '<button class="rin-variant-pill' + on + '" ' +
+        'onclick="rinSetVariant(\'' + themeKey + '\',\'' + cardKey + '\',\'' + k + '\')">' +
+        variants[k].label + '</button>';
+    }).join('');
+  } else {
+    variantsEl.style.display = 'none';
+    variantsEl.innerHTML = '';
+  }
+
+  rinRenderModalChart(themeKey, cardKey, useToggle);
+  document.getElementById('rin-modal-overlay').classList.add('on');
+}
+
+function rinSetVariant(themeKey, cardKey, variantKey){
+  rinActiveVariant = variantKey;
+  var pills = document.querySelectorAll('#rin-modal-variants .rin-variant-pill');
+  pills.forEach(function(p){ p.classList.remove('on'); });
+  var theme = RIN_DATA.themes.find(function(t){return t.key===themeKey;});
+  var card = theme.cards.find(function(c){return c.key===cardKey;});
+  var order = ['levels','growth','share'].filter(function(k){return card.time_series_variants[k];});
+  var idx = order.indexOf(variantKey);
+  if(idx>=0 && pills[idx]) pills[idx].classList.add('on');
+  rinRenderModalChart(themeKey, cardKey, false);
+}
+
+function rinRenderModalChart(themeKey, cardKey, useToggle){
+  var theme = RIN_DATA.themes.find(function(t){return t.key===themeKey;});
+  var card = theme.cards.find(function(c){return c.key===cardKey;});
+
+  var variant = (!useToggle && card.time_series_variants && card.time_series_variants[rinActiveVariant])
+    ? card.time_series_variants[rinActiveVariant] : null;
+  var ts = (useToggle && card.time_series_toggle) ? card.time_series_toggle
+           : (variant || card.time_series);
+  if(!ts || !ts.periods || !ts.periods.length){return;}
+
+  var isLevelsView = !variant || rinActiveVariant==='levels';
+
+  var color = RIN_COLORS[themeKey] || '#262262';
+  var n = ts.values.filter(function(v){return v!=null;}).length;
+  var useBar = n <= 3;
+  var seriesName = (useToggle && card.toggle) ? card.toggle.label
+                   : (variant ? variant.label : card.label);
+  var seriesUnit = (useToggle && card.toggle) ? card.toggle.unit
+                   : (variant ? variant.unit : card.unit);
+  var seriesFmt = (useToggle && card.toggle) ? card.toggle.format
+                  : (variant ? null : card.format);
+
+  // Trace color reflects whether the latest point sits above/below the
+  // card's historical average, mirroring the sparkline on the card face
+  // (e.g. wage growth currently above its long-run average renders green).
+  // Prefers levels_average over comparator_value since the latter is
+  // sometimes a growth rate (e.g. CAGR for Sales Value/Volume) rather
+  // than a level, and can't be meaningfully diffed against the series.
+  // Only applied to the levels view -- growth/share variants don't have
+  // a directly comparable average to diff against.
+  var avgForCompare = card.levels_average!=null ? card.levels_average : card.comparator_value;
+  var lineColor = color;
+  if(!useToggle && isLevelsView && card.good_direction && avgForCompare!=null){
+    var latestVal = null;
+    for(var i=ts.values.length-1;i>=0;i--){ if(ts.values[i]!=null){ latestVal = ts.values[i]; break; } }
+    if(latestVal!=null){
+      var diff = latestVal - avgForCompare;
+      if(diff!==0){
+        var above = diff>0;
+        var isGood = (above && card.good_direction==='up') || (!above && card.good_direction==='down');
+        lineColor = isGood ? '#2d9e2d' : '#e03030';
+      }
+    }
+  }
+
+  var hoverTpl = seriesName + ': %{customdata}<extra></extra>';
+  var customdata = ts.values.map(function(v){ return rinFmtValue(v, seriesUnit, seriesFmt); });
+
+  var traces = [];
+  if(useBar){
+    traces.push({
+      x: ts.periods, y: ts.values, type:'bar', name: seriesName,
+      marker:{color: lineColor}, customdata: customdata, hovertemplate: hoverTpl
+    });
+  } else {
+    traces.push({
+      x: ts.periods, y: ts.values, type:'scatter', mode:'lines', name: seriesName,
+      line:{color: lineColor, width:2.5}, fill:'tozeroy',
+      fillcolor: lineColor + '1a', customdata: customdata, hovertemplate: hoverTpl
+    });
+  }
+
+  // Dashed historical-average reference line (uses the same levels-correct
+  // average as the trace coloring above), skipped for theme types where a
+  // short policy-driven series makes an average read as noise (e.g. Tax),
+  // skipped when using the toggle series since the average refers to the
+  // default series only, and skipped for growth/share variants since the
+  // average shown on the card face is specifically a levels average.
+  if(!useToggle && isLevelsView && RIN_NO_AVG_THEMES.indexOf(themeKey)===-1 && avgForCompare!=null){
+    var avgFormatted = rinFmtValue(avgForCompare, card.unit, card.format);
+    traces.push({
+      x: ts.periods, y: ts.periods.map(function(){return avgForCompare;}),
+      type:'scatter', mode:'lines',
+      line:{color:'#888', width:1.5, dash:'dash'},
+      name: 'Average',
+      hovertemplate: 'Average: ' + avgFormatted + '<extra></extra>'
+    });
+  }
+
+  Plotly.newPlot('rin-modal-chart', traces, {
+    font:{family:'Lato,sans-serif', size:13, color:'#444'},
+    paper_bgcolor:'transparent', plot_bgcolor:'transparent',
+    margin:{t:20, r:20, b:40, l:55},
+    showlegend: traces.length>1,
+    legend:{orientation:'h', y:1.12, font:{size:11}},
+    xaxis:{gridcolor:'#eee', tickfont:{size:11}},
+    yaxis:{gridcolor:'#eee', tickfont:{size:11}, ticksuffix: rinUnitSuffix(seriesUnit)},
+    hovermode:'x unified',
+    hoverlabel:{bgcolor:'white', bordercolor:'#ccc', font:{family:'Lato,sans-serif', size:12}}
+  }, {responsive:true, displayModeBar:false});
+}
+
+function rinCloseModal(){
+  document.getElementById('rin-modal-overlay').classList.remove('on');
+  Plotly.purge('rin-modal-chart');
+}
+function rinToggleCard(btn, themeKey, cardKey){
+  // Toggle button opens the alternate (e.g. SIC-47-only) time series directly,
+  // since the card face itself always shows the default (Section G) values.
+  rinOpenTimeSeries(themeKey, cardKey, true);
+}
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape') rinCloseModal();
+});
+
+</script>
+</body>
+</html>
