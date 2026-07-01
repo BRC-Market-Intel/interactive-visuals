@@ -15,16 +15,11 @@
   --muted:#777;--border:#dde1e7;--bg:#f4f6f9}
 body{font-family:var(--font);background:var(--bg);color:#222;line-height:1.4}
 .rin-shell{max-width:920px;margin:0 auto}
-.rin-header{background:var(--navy);color:#fff;padding:32px 4px 0}
-.rin-header-inner{max-width:872px;margin:0 auto}
-.rin-eyebrow{font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;opacity:.6}
-.rin-header h1{font-size:32px;font-weight:900;margin-top:6px}
-.rin-subtitle{font-size:14px;opacity:.75;margin-top:4px;margin-bottom:24px}
-.rin-nav{display:flex;gap:4px;max-width:872px;margin:0 auto;overflow-x:auto}
-.rin-nav-link{color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;font-weight:700;
-  padding:10px 16px;border-bottom:3px solid transparent;white-space:nowrap;transition:all .15s}
-.rin-nav-link:hover{color:#fff;border-bottom-color:var(--theme-color)}
-.rin-main{padding:28px 4px 8px}
+.rin-nav{display:flex;flex-wrap:wrap;gap:4px;padding:10px 4px;border-bottom:2px solid var(--grey)}
+.rin-nav-link{color:var(--navy);text-decoration:none;font-size:13px;font-weight:700;
+  padding:6px 14px;border-radius:20px;white-space:nowrap;transition:all .15s}
+.rin-nav-link:hover{background:var(--grey)}
+.rin-main{padding:20px 4px 8px}
 .rin-theme{margin-bottom:36px;scroll-margin-top:16px}
 .rin-theme-hdr{border-left:5px solid var(--theme-color);padding-left:12px;margin-bottom:14px}
 .rin-theme-hdr h2{font-size:20px;font-weight:900;color:var(--navy)}
@@ -75,7 +70,6 @@ body{font-family:var(--font);background:var(--bg);color:#222;line-height:1.4}
 .rin-variant-pill.on{background:var(--navy);color:#fff;border-color:var(--navy)}
 .rin-modal-chart{flex:1 1 auto;min-height:260px;padding:8px 12px 12px}
 @media(max-width:640px){
-  .rin-header h1{font-size:24px}
   .rin-card-grid{grid-template-columns:1fr}
   .rin-card-val{font-size:21px}
   .rin-card-label{font-size:14px}
@@ -86,17 +80,10 @@ body{font-family:var(--font);background:var(--bg);color:#222;line-height:1.4}
 </head>
 <body>
 <div class="rin-shell">
-  <header class="rin-header">
-    <div class="rin-header-inner">
-      <div class="rin-eyebrow">British Retail Consortium</div>
-      <h1>Retail in Numbers</h1>
-      <p class="rin-subtitle">The UK retail industry, at a glance.</p>
-    </div>
-    <nav class="rin-nav"><a href="#theme-industry_size" class="rin-nav-link" style="--theme-color:#00BBCE">Industry Size</a>
+  <nav class="rin-nav"><a href="#theme-industry_size" class="rin-nav-link" style="--theme-color:#00BBCE">Industry Size</a>
 <a href="#theme-employment" class="rin-nav-link" style="--theme-color:#F37021">Employment</a>
 <a href="#theme-tax" class="rin-nav-link" style="--theme-color:#92278F">Tax</a>
 <a href="#theme-business_demographics" class="rin-nav-link" style="--theme-color:#8CC747">Business Demographics</a></nav>
-  </header>
   <main class="rin-main">
     <section class="rin-theme" id="theme-industry_size">
   <div class="rin-theme-hdr" style="--theme-color:#00BBCE">
